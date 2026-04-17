@@ -8,7 +8,8 @@
       "documents": "Documents",
       "calls": "Call Help",
       "letters": "Letters",
-      "autocall": "AI Call"
+      "autocall": "AI Call",
+      "emergency": "Emergency"
     },
     "home": {
       "welcome": "Welcome to SprachBrücke",
@@ -29,6 +30,10 @@
         "letters": {
           "title": "Write Letters",
           "desc": "We write professional German letters"
+        },
+        "autocall": {
+          "title": "AI Call",
+          "desc": "AI calls · speaks German · summary in your language"
         }
       },
       "startChat": "Start Chat",

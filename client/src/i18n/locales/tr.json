@@ -8,7 +8,8 @@
       "documents": "Belgeler",
       "calls": "Arama Yardımı",
       "letters": "Mektuplar",
-      "autocall": "Yapay Zeka Arama"
+      "autocall": "Yapay Zeka Arama",
+      "emergency": "Acil Durum"
     },
     "home": {
       "welcome": "SprachBrücke'ye Hoş Geldiniz",
@@ -29,6 +30,10 @@
         "letters": {
           "title": "Mektup Yaz",
           "desc": "Profesyonel Almanca mektuplar yazıyoruz"
+        },
+        "autocall": {
+          "title": "YZ Araması",
+          "desc": "YZ arar · Almanca konuşur · özetler"
         }
       },
       "startChat": "Sohbeti Başlat",

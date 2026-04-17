@@ -8,7 +8,8 @@
       "documents": "Dokumente",
       "calls": "Anruf-Hilfe",
       "letters": "Briefe",
-      "autocall": "KI-Anruf"
+      "autocall": "KI-Anruf",
+      "emergency": "Notruf"
     },
     "home": {
       "welcome": "Willkommen bei SprachBrücke",
@@ -29,6 +30,10 @@
         "letters": {
           "title": "Briefe schreiben",
           "desc": "Wir schreiben professionelle Briefe auf Deutsch"
+        },
+        "autocall": {
+          "title": "KI-Anruf",
+          "desc": "KI ruft an · spricht Deutsch · Zusammenfassung"
         }
       },
       "startChat": "Chat starten",

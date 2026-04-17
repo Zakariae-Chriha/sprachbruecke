@@ -8,7 +8,8 @@
       "documents": "Documents",
       "calls": "Aide appel",
       "letters": "Lettres",
-      "autocall": "Appel IA"
+      "autocall": "Appel IA",
+      "emergency": "Urgence"
     },
     "home": {
       "welcome": "Bienvenue sur SprachBrücke",
@@ -29,6 +30,10 @@
         "letters": {
           "title": "Écrire des lettres",
           "desc": "Nous rédigeons des lettres professionnelles en allemand"
+        },
+        "autocall": {
+          "title": "Appel IA",
+          "desc": "L'IA appelle · parle allemand · résumé"
         }
       },
       "startChat": "Commencer le chat",

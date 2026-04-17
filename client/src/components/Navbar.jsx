@@ -1,16 +1,76 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, MessageCircle, FileText, Phone, Mail, PhoneCall, Siren } from 'lucide-react';
-import LanguageSelector from './LanguageSelector';
+import {
+  Home, MessageCircle, FileText, Phone,
+  Mail, PhoneCall, Siren, Globe,
+} from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
-const NAV_ITEMS = [
-  { path: '/', icon: Home, key: 'home' },
-  { path: '/chat', icon: MessageCircle, key: 'chat' },
-  { path: '/documents', icon: FileText, key: 'documents' },
-  { path: '/calls', icon: Phone, key: 'calls' },
-  { path: '/letters', icon: Mail, key: 'letters' },
-  { path: '/autocall', icon: PhoneCall, key: 'autocall' },
+const LANGUAGES = [
+  { code: 'ar', flag: '🇸🇦', label: 'العربية' },
+  { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
+  { code: 'en', flag: '🇬🇧', label: 'English' },
+  { code: 'tr', flag: '🇹🇷', label: 'Türkçe' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский' },
+  { code: 'uk', flag: '🇺🇦', label: 'Українська' },
+  { code: 'fr', flag: '🇫🇷', label: 'Français' },
+  { code: 'fa', flag: '🇮🇷', label: 'فارسی' },
 ];
+
+const NAV = [
+  { path: '/',          icon: Home,          key: 'home' },
+  { path: '/chat',      icon: MessageCircle, key: 'chat' },
+  { path: '/documents', icon: FileText,      key: 'documents' },
+  { path: '/autocall',  icon: PhoneCall,     key: 'autocall' },
+  { path: '/calls',     icon: Phone,         key: 'calls' },
+];
+
+function LangPopup() {
+  const { i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const current = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[2];
+
+  useEffect(() => {
+    const fn = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition-all"
+        style={{ background: open ? '#EFF6FF' : 'white', borderColor: open ? '#93C5FD' : '#E8EDF5', color: open ? '#2563EB' : '#475569' }}
+      >
+        <Globe size={15} />
+        <span>{current.flag} {current.label}</span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-12 z-50 w-48 rounded-2xl shadow-xl border border-slate-100 overflow-hidden fade-in-fast"
+          style={{ background: 'white' }}>
+          {LANGUAGES.map(lang => (
+            <button
+              key={lang.code}
+              onClick={() => { i18n.changeLanguage(lang.code); setOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all text-left"
+              style={{
+                background: i18n.language === lang.code ? '#EFF6FF' : 'transparent',
+                color: i18n.language === lang.code ? '#2563EB' : '#475569',
+              }}
+            >
+              <span className="text-lg">{lang.flag}</span>
+              <span>{lang.label}</span>
+              {i18n.language === lang.code && <span className="ml-auto text-blue-400">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Navbar() {
   const { t } = useTranslation();
@@ -18,96 +78,71 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop Navbar */}
-      <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50"
-        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(99,102,241,0.1)', boxShadow: '0 4px 20px rgba(99,102,241,0.08)' }}>
-        <div className="max-w-6xl mx-auto w-full flex items-center justify-between px-6 py-3">
+      {/* ── Desktop top bar ── */}
+      <nav className="hidden md:flex navbar-top">
+        <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md group-hover:scale-110 transition-transform"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-              🤖
+          <Link to="/" className="flex items-center gap-3 select-none">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xl shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #2563EB, #7C3AED)' }}>
+              🌉
             </div>
-            <span className="font-bold text-xl gradient-text">{t('appName')}</span>
+            <span className="font-bold text-lg gradient-text">SprachBrücke</span>
           </Link>
 
-          {/* Nav Links */}
+          {/* Links */}
           <div className="flex items-center gap-1">
-            {NAV_ITEMS.map(({ path, icon: Icon, key }) => {
-              const isActive = location.pathname === path;
-              return (
-                <Link
-                  key={path}
-                  to={path}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
-                    isActive ? 'nav-active-item' : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50'
-                  }`}
-                >
-                  <Icon size={15} />
-                  <span>{t(`nav.${key}`)}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          <Link
-            to="/emergency"
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
-              location.pathname === '/emergency'
-                ? 'bg-red-600 text-white'
-                : 'bg-red-100 text-red-700 hover:bg-red-200'
-            }`}
-          >
-            <Siren size={15} />
-            <span>SOS</span>
-          </Link>
-          <LanguageSelector compact />
-        </div>
-      </nav>
-
-      {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between"
-        style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(99,102,241,0.1)', boxShadow: '0 2px 10px rgba(99,102,241,0.08)' }}>
-        <Link to="/" className="font-bold text-lg flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-            🤖
-          </div>
-          <span className="gradient-text">{t('appName')}</span>
-        </Link>
-        <LanguageSelector compact />
-      </div>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50"
-        style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(99,102,241,0.1)', boxShadow: '0 -4px 20px rgba(99,102,241,0.08)' }}>
-        <div className="flex justify-around items-center py-2 px-2">
-          {NAV_ITEMS.map(({ path, icon: Icon, key }) => {
-            const isActive = location.pathname === path;
-            return (
+            {NAV.map(({ path, icon: Icon, key }) => (
               <Link
                 key={path}
                 to={path}
-                className={`flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-all ${
-                  isActive ? 'text-indigo-600' : 'text-slate-400'
-                }`}
+                className={`nav-link-desktop ${location.pathname === path ? 'active' : ''}`}
               >
-                <Icon size={20} style={isActive ? { filter: 'drop-shadow(0 0 6px rgba(99,102,241,0.5))' } : {}} />
-                <span className="text-xs font-medium">{t(`nav.${key}`)}</span>
+                <Icon size={16} />
+                {t(`nav.${key}`)}
               </Link>
-            );
-          })}
-          {/* SOS emergency button — always red */}
-          <Link
-            to="/emergency"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-all ${
-              location.pathname === '/emergency' ? 'text-red-700' : 'text-red-500'
-            }`}
-          >
-            <Siren size={20} />
-            <span className="text-xs font-bold">SOS</span>
-          </Link>
+            ))}
+            <Link to="/letters" className={`nav-link-desktop ${location.pathname === '/letters' ? 'active' : ''}`}>
+              <Mail size={16} />{t('nav.letters')}
+            </Link>
+            <Link to="/emergency" className="nav-link-desktop nav-link-sos ml-1">
+              <Siren size={16} /> SOS
+            </Link>
+          </div>
+
+          <LangPopup />
         </div>
+      </nav>
+
+      {/* ── Mobile top bar ── */}
+      <div className="md:hidden flex items-center justify-between px-4 py-3 fixed top-0 left-0 right-0 z-50"
+        style={{ background: 'rgba(255,255,255,0.94)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #E8EDF5' }}>
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base"
+            style={{ background: 'linear-gradient(135deg, #2563EB, #7C3AED)' }}>
+            🌉
+          </div>
+          <span className="font-bold text-base gradient-text">SprachBrücke</span>
+        </Link>
+        <LangPopup />
+      </div>
+
+      {/* ── Mobile bottom bar ── */}
+      <nav className="md:hidden navbar-bottom">
+        {NAV.map(({ path, icon: Icon, key }) => (
+          <Link
+            key={path}
+            to={path}
+            className={`nav-item ${location.pathname === path ? 'active' : ''}`}
+          >
+            <Icon size={22} />
+            <span>{t(`nav.${key}`)}</span>
+          </Link>
+        ))}
+        <Link to="/emergency" className="nav-item-sos">
+          <Siren size={22} />
+          <span>SOS</span>
+        </Link>
       </nav>
     </>
   );
