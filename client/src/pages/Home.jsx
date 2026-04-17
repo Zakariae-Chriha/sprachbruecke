@@ -83,7 +83,7 @@ export default function Home() {
       {/* ── Hero ── */}
       <div className="fade-in text-center pt-2 pb-6">
         <div className="flex justify-center mb-2">
-          <Bridge3D size={300} />
+          <Bridge3D size={380} />
         </div>
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
           {t('home.welcome')}
