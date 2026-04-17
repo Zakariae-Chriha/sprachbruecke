@@ -10,36 +10,40 @@ const openai = new OpenAI({
 const activeCalls = {};
 
 // ============================
-// SSML helper — slow speech + phone number handling
+// SSML helper — slow speech + phone number repetition
+// Twilio Polly: wrap entire message in <speak>, use <prosody rate="slow">
 // ============================
 function toSSML(text) {
-  // Escape XML special characters
+  // Escape XML special characters first
   const safe = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-  // Detect phone-number-like sequences (6+ digits, possibly with spaces/dashes)
-  const phoneRegex = /(\+?[\d][\d\s\-\/\.]{4,}[\d])/g;
+  // Detect phone numbers: sequences with 6+ digits (spaces/dashes allowed)
+  const phoneRegex = /(\+?[\d][\d\s\-]{4,}[\d])/g;
   const withPhones = safe.replace(phoneRegex, (match) => {
-    const digits = (match.match(/\d/g) || []).length;
-    if (digits < 5) return match;
-    const cleaned = match.trim();
-    // Speak slowly digit by digit, then repeat
-    return `<break time="400ms"/>` +
-      `<prosody rate="x-slow"><say-as interpret-as="telephone">${cleaned}</say-as></prosody>` +
-      `<break time="600ms"/>` +
-      `<prosody rate="x-slow">Ich wiederhole: <say-as interpret-as="telephone">${cleaned}</say-as></prosody>` +
-      `<break time="400ms"/>`;
+    const digitCount = (match.match(/\d/g) || []).length;
+    if (digitCount < 5) return match;
+    const n = match.trim();
+    return (
+      `<break time="300ms"/>` +
+      `<say-as interpret-as="telephone">${n}</say-as>` +
+      `<break time="500ms"/>` +
+      `Ich wiederhole: ` +
+      `<say-as interpret-as="telephone">${n}</say-as>` +
+      `<break time="300ms"/>`
+    );
   });
 
-  return `<speak><prosody rate="slow">${withPhones}</prosody></speak>`;
+  // Wrap everything in slow prosody
+  return `<speak><prosody rate="85%">${withPhones}</prosody></speak>`;
 }
 
 // Extract phone numbers from text for logging
 function extractPhones(text) {
-  const matches = text.match(/(\+?[\d][\d\s\-\/\.]{4,}[\d])/g) || [];
-  return matches.filter(m => (m.match(/\d/g) || []).length >= 5);
+  return (text.match(/(\+?[\d][\d\s\-]{4,}[\d])/g) || [])
+    .filter(m => (m.match(/\d/g) || []).length >= 5);
 }
 
 // ============================
