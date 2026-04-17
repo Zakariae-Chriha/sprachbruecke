@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const DocumentAnalysis = require('../models/DocumentAnalysis');
 const path = require('path');
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
@@ -97,10 +98,19 @@ IMPORTANT: Write your ENTIRE response in ${language} only. Do not mix languages.
     // Datei nach Analyse löschen (Datenschutz)
     fs.unlinkSync(req.file.path);
 
+    const analysisText = analysisResponse.choices[0].message.content;
+
+    // Save to database
+    try {
+      await DocumentAnalysis.create({ fileName: req.file.originalname, language, analysis: analysisText });
+    } catch (dbErr) {
+      console.error('DB save error:', dbErr.message);
+    }
+
     res.json({
       success: true,
       fileName: req.file.originalname,
-      analysis: analysisResponse.choices[0].message.content,
+      analysis: analysisText,
       extractedText: extractedText.substring(0, 500) + (extractedText.length > 500 ? '...' : ''),
     });
   } catch (err) {

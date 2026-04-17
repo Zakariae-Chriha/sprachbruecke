@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const OpenAI = require('openai');
 const auth = require('../middleware/auth');
+const ChatHistory = require('../models/ChatHistory');
 
 // Groq - kostenlose AI API (console.groq.com)
 const openai = new OpenAI({
@@ -57,10 +58,29 @@ router.post('/message', async (req, res) => {
 
     const assistantMessage = response.choices[0].message.content;
 
-    res.json({
-      message: assistantMessage,
-      tokens: response.usage,
-    });
+    // Save to database
+    try {
+      const sessionId = req.headers['x-session-id'] || 'anonymous';
+      await ChatHistory.findOneAndUpdate(
+        { sessionId },
+        {
+          $set: { language: userLanguage, updatedAt: new Date() },
+          $push: {
+            messages: {
+              $each: [
+                ...messages.slice(-1).map((m) => ({ role: m.role, content: m.content })),
+                { role: 'assistant', content: assistantMessage },
+              ],
+            },
+          },
+        },
+        { upsert: true, new: true }
+      );
+    } catch (dbErr) {
+      console.error('DB save error:', dbErr.message);
+    }
+
+    res.json({ message: assistantMessage, tokens: response.usage });
   } catch (err) {
     console.error('Chat Fehler:', err.message);
     res.status(500).json({ message: 'Chat-Fehler', error: err.message });
