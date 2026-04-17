@@ -25,6 +25,12 @@ export default function Chat() {
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
+  const sessionId = useState(() => {
+    let id = localStorage.getItem('sb_session');
+    if (!id) { id = `s_${Date.now()}`; localStorage.setItem('sb_session', id); }
+    return id;
+  })[0];
+
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || loading) return;
@@ -38,8 +44,8 @@ export default function Chat() {
     try {
       const res = await axios.post('/api/chat/message', {
         messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
-        userLanguage: LANGUAGE_NAMES[i18n.language] || 'Arabisch',
-      });
+        userLanguage: LANGUAGE_NAMES[i18n.language] || 'English',
+      }, { headers: { 'x-session-id': sessionId } });
       setMessages([...newMessages, { role: 'assistant', content: res.data.message }]);
     } catch (err) {
       toast.error(t('chat.error'));
