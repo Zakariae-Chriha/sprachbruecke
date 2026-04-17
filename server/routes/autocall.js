@@ -10,6 +10,39 @@ const openai = new OpenAI({
 const activeCalls = {};
 
 // ============================
+// SSML helper — slow speech + phone number handling
+// ============================
+function toSSML(text) {
+  // Escape XML special characters
+  const safe = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Detect phone-number-like sequences (6+ digits, possibly with spaces/dashes)
+  const phoneRegex = /(\+?[\d][\d\s\-\/\.]{4,}[\d])/g;
+  const withPhones = safe.replace(phoneRegex, (match) => {
+    const digits = (match.match(/\d/g) || []).length;
+    if (digits < 5) return match;
+    const cleaned = match.trim();
+    // Speak slowly digit by digit, then repeat
+    return `<break time="400ms"/>` +
+      `<prosody rate="x-slow"><say-as interpret-as="telephone">${cleaned}</say-as></prosody>` +
+      `<break time="600ms"/>` +
+      `<prosody rate="x-slow">Ich wiederhole: <say-as interpret-as="telephone">${cleaned}</say-as></prosody>` +
+      `<break time="400ms"/>`;
+  });
+
+  return `<speak><prosody rate="slow">${withPhones}</prosody></speak>`;
+}
+
+// Extract phone numbers from text for logging
+function extractPhones(text) {
+  const matches = text.match(/(\+?[\d][\d\s\-\/\.]{4,}[\d])/g) || [];
+  return matches.filter(m => (m.match(/\d/g) || []).length >= 5);
+}
+
+// ============================
 // TEST: GET /api/autocall/test-twiml
 // Simple TwiML to verify pipeline
 // ============================
@@ -129,8 +162,8 @@ router.post('/webhook/voice', async (req, res) => {
 
     const ngrokUrl = process.env.NGROK_URL;
 
-    // Speak the greeting
-    twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' }, intro);
+    // Speak the greeting slowly
+    twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' }, toSSML(intro));
 
     // Wait for response
     const gather = twiml.gather({
@@ -138,14 +171,15 @@ router.post('/webhook/voice', async (req, res) => {
       language: 'de-DE',
       action: `${ngrokUrl}/api/autocall/webhook/respond?sid=${callSid}`,
       method: 'POST',
-      timeout: 12,
+      timeout: 15,
       speechTimeout: 'auto',
     });
-    gather.say({ voice: 'Polly.Vicki', language: 'de-DE' }, 'Ich höre.');
+    gather.say({ voice: 'Polly.Vicki', language: 'de-DE' },
+      '<speak><prosody rate="slow">Ich höre zu, bitte sprechen Sie.</prosody></speak>');
 
     // No response fallback
     twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
-      'Ich habe leider keine Antwort erhalten. Auf Wiederhören.');
+      '<speak><prosody rate="slow">Ich habe leider keine Antwort erhalten. Auf Wiederhören.</prosody></speak>');
     twiml.hangup();
 
   } catch (err) {
@@ -192,32 +226,34 @@ router.post('/webhook/respond', async (req, res) => {
     }
 
     // AI generates German response
-    const systemPrompt = `Du bist ein KI-Telefonassistent. Du führst ein Telefonat auf DEUTSCH.
+    const systemPrompt = `Du bist ein KI-Telefonassistent. Du führst ein Telefonat auf DEUTSCH für eine Person, die kein Deutsch spricht.
 
 Du rufst an für: ${userName}
 Zweck: ${purpose}
 Aktenzeichen: ${caseNumber || 'nicht angegeben'}
 Bei: ${organizationName}
 
-REGELN:
-- Sprich IMMER nur auf DEUTSCH
-- Sei sehr höflich und professionell
-- Sprich kurze, klare Sätze (max 2 Sätze pro Antwort)
-- Falls ein Termin angeboten wird: bestätige Datum und Uhrzeit laut
-- Falls du fertig bist oder verabschiedet wirst: sage genau "ANRUF_BEENDEN"
-- Bleib beim Thema`;
+PFLICHTREGELN — halte dich IMMER daran:
+1. Sprich NUR auf DEUTSCH, langsam und deutlich.
+2. Maximal 3 kurze Sätze pro Antwort.
+3. TELEFONNUMMERN: Wenn die Person eine Telefonnummer nennt, wiederhole sie sofort zweimal langsam Ziffer für Ziffer und frage: "Habe ich die Nummer richtig: [Nummer]? Ist das korrekt?"
+4. TERMINE & DATUM: Wenn Datum oder Uhrzeit genannt wird, bestätige sofort: "Ich notiere: [Wochentag], den [Datum] um [Uhrzeit] Uhr. Ist das korrekt?"
+5. AKTENZEICHEN / WICHTIGE NUMMERN: Immer zweimal wiederholen und bestätigen.
+6. Falls die Person fragt ob du verstanden hast: Wiederhole die wichtigsten Infos kurz.
+7. Falls du fertig bist oder verabschiedet wirst: Sage genau "ANRUF_BEENDEN".
+8. Bleib beim Thema: ${purpose}.`;
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...(callData?.history || []).slice(-8),
-      { role: 'user', content: `Die Person am Telefon hat gesagt: "${speechResult}". Antworte kurz und höflich auf Deutsch.` }
+      ...(callData?.history || []).slice(-10),
+      { role: 'user', content: `Die Person am Telefon hat gesagt: "${speechResult}". Antworte kurz und höflich auf Deutsch. Wenn eine Telefonnummer, ein Datum oder eine wichtige Nummer genannt wurde, wiederhole sie sofort zur Bestätigung.` }
     ];
 
     const response = await openai.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages,
-      max_tokens: 100,
-      temperature: 0.3,
+      max_tokens: 150,
+      temperature: 0.2,
     });
 
     const aiResponse = response.choices[0].message.content.trim();
@@ -226,17 +262,22 @@ REGELN:
       aiResponse.toLowerCase().includes('tschüss');
 
     const cleanResponse = aiResponse.replace('ANRUF_BEENDEN', '').trim();
+
+    // Log detected phone numbers
+    const phones = extractPhones(cleanResponse);
+    if (phones.length > 0) console.log(`📱 Telefonnummern erkannt: ${phones.join(', ')}`);
     console.log(`🤖 KI antwortet: "${cleanResponse}"`);
 
     if (callData) {
       callData.history.push({ role: 'assistant', content: cleanResponse });
     }
 
-    twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' }, cleanResponse);
+    // Use SSML for slow speech + automatic phone number repetition
+    twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' }, toSSML(cleanResponse));
 
     if (shouldHangup) {
       twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
-        'Vielen Dank für Ihre Hilfe. Auf Wiederhören!');
+        '<speak><prosody rate="slow">Vielen Dank für Ihre Hilfe. Auf Wiederhören!</prosody></speak>');
       twiml.hangup();
       if (callData) setTimeout(() => generateSummary(callSid), 2000);
     } else {
@@ -246,13 +287,14 @@ REGELN:
         language: 'de-DE',
         action: `${ngrokUrl}/api/autocall/webhook/respond?sid=${callSid}`,
         method: 'POST',
-        timeout: 12,
+        timeout: 15,
         speechTimeout: 'auto',
       });
-      gather.say({ voice: 'Polly.Vicki', language: 'de-DE' }, 'Ja bitte?');
+      gather.say({ voice: 'Polly.Vicki', language: 'de-DE' },
+        '<speak><prosody rate="slow">Bitte sprechen Sie.</prosody></speak>');
 
       twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
-        'Vielen Dank. Auf Wiederhören.');
+        '<speak><prosody rate="slow">Vielen Dank. Auf Wiederhören.</prosody></speak>');
       twiml.hangup();
       if (callData) setTimeout(() => generateSummary(callSid), 2000);
     }
