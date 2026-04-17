@@ -1,0 +1,110 @@
+{
+  "translation": {
+    "appName": "SprachBrücke",
+    "tagline": "Votre assistant personnel pour les administrations allemandes",
+    "nav": {
+      "home": "Accueil",
+      "chat": "Assistant IA",
+      "documents": "Documents",
+      "calls": "Aide appel",
+      "letters": "Lettres",
+      "autocall": "Appel IA"
+    },
+    "home": {
+      "welcome": "Bienvenue sur SprachBrücke",
+      "subtitle": "Nous vous aidons avec les administrations, médecins et correspondances officielles en Allemagne",
+      "features": {
+        "chat": {
+          "title": "Assistant IA",
+          "desc": "Décrivez votre problème, nous vous aidons étape par étape"
+        },
+        "documents": {
+          "title": "Analyser un document",
+          "desc": "Téléchargez une lettre, nous l'expliquons"
+        },
+        "calls": {
+          "title": "Aide pour l'appel",
+          "desc": "Nous préparons un script pour votre appel"
+        },
+        "letters": {
+          "title": "Écrire des lettres",
+          "desc": "Nous rédigeons des lettres professionnelles en allemand"
+        }
+      },
+      "startChat": "Commencer le chat",
+      "uploadDoc": "Télécharger un document",
+      "languages": "Disponible en 8 langues"
+    },
+    "chat": {
+      "title": "Assistant IA",
+      "placeholder": "Décrivez votre problème... (dans n'importe quelle langue)",
+      "send": "Envoyer",
+      "typing": "En train d'écrire...",
+      "welcome": "Bonjour! Je suis SprachBrücke, votre assistant personnel. Comment puis-je vous aider aujourd'hui?",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "documents": {
+      "title": "Analyser un document",
+      "subtitle": "Téléchargez une lettre officielle ou un document",
+      "dropzone": "Glissez-déposez votre fichier ici ou cliquez pour sélectionner",
+      "supported": "PDF, JPG, PNG supportés (jusqu'à 10MB)",
+      "analyzing": "Analyse en cours...",
+      "result": "Résultat de l'analyse",
+      "uploadAnother": "Analyser un autre document"
+    },
+    "calls": {
+      "title": "Aide pour l'appel téléphonique",
+      "subtitle": "Nous préparons un script complet pour votre appel",
+      "situation": "Décrivez votre situation",
+      "situationPlaceholder": "ex. Je veux prendre un rendez-vous au bureau des étrangers",
+      "organization": "Nom de l'administration/organisation",
+      "orgPlaceholder": "ex. Bureau des étrangers, médecin, école...",
+      "generate": "Générer le script",
+      "generating": "Génération en cours...",
+      "result": "Votre script téléphonique",
+      "copy": "Copier le texte"
+    },
+    "letters": {
+      "title": "Rédiger une lettre officielle",
+      "subtitle": "Nous rédigeons une lettre professionnelle en allemand",
+      "situation": "Que voulez-vous écrire?",
+      "situationPlaceholder": "ex. J'ai besoin d'une lettre pour le centre d'emploi",
+      "letterType": "Type de lettre",
+      "types": {
+        "general": "Lettre générale",
+        "appointment": "Demande de rendez-vous",
+        "complaint": "Plainte",
+        "request": "Demande officielle",
+        "appeal": "Recours"
+      },
+      "recipient": "Destinataire",
+      "recipientPlaceholder": "ex. Jobcenter, bureau des étrangers...",
+      "generate": "Générer la lettre",
+      "generating": "Génération en cours...",
+      "german": "Lettre en allemand",
+      "translation": "Traduction",
+      "copy": "Copier",
+      "download": "Télécharger"
+    },
+    "language": {
+      "select": "Choisir la langue",
+      "ar": "Arabe",
+      "de": "Allemand",
+      "en": "Anglais",
+      "tr": "Turc",
+      "ru": "Russe",
+      "uk": "Ukrainien",
+      "fr": "Français",
+      "fa": "Persan"
+    },
+    "common": {
+      "loading": "Chargement...",
+      "error": "Une erreur s'est produite",
+      "retry": "Réessayer",
+      "copy": "Copier",
+      "copied": "Copié!",
+      "close": "Fermer",
+      "back": "Retour"
+    }
+  }
+}

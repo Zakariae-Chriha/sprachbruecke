@@ -1,0 +1,110 @@
+{
+  "translation": {
+    "appName": "SprachBrücke",
+    "tagline": "Your personal assistant for German authorities",
+    "nav": {
+      "home": "Home",
+      "chat": "AI Assistant",
+      "documents": "Documents",
+      "calls": "Call Help",
+      "letters": "Letters",
+      "autocall": "AI Call"
+    },
+    "home": {
+      "welcome": "Welcome to SprachBrücke",
+      "subtitle": "We help you with German authorities, doctors, and official correspondence",
+      "features": {
+        "chat": {
+          "title": "AI Assistant",
+          "desc": "Describe your problem and we help step by step"
+        },
+        "documents": {
+          "title": "Analyze Document",
+          "desc": "Upload a letter and we explain it"
+        },
+        "calls": {
+          "title": "Call Help",
+          "desc": "We prepare a phone script for you"
+        },
+        "letters": {
+          "title": "Write Letters",
+          "desc": "We write professional German letters"
+        }
+      },
+      "startChat": "Start Chat",
+      "uploadDoc": "Upload Document",
+      "languages": "Available in 8 languages"
+    },
+    "chat": {
+      "title": "AI Assistant",
+      "placeholder": "Describe your problem... (in any language)",
+      "send": "Send",
+      "typing": "Typing...",
+      "welcome": "Hello! I'm SprachBrücke, your personal assistant. How can I help you today?",
+      "error": "An error occurred. Please try again."
+    },
+    "documents": {
+      "title": "Analyze Document",
+      "subtitle": "Upload a government letter or document",
+      "dropzone": "Drag and drop your file here or click to select",
+      "supported": "PDF, JPG, PNG supported (up to 10MB)",
+      "analyzing": "Analyzing...",
+      "result": "Analysis Result",
+      "uploadAnother": "Analyze another document"
+    },
+    "calls": {
+      "title": "Phone Call Help",
+      "subtitle": "We prepare a complete phone script for you",
+      "situation": "Describe your situation",
+      "situationPlaceholder": "e.g. I want to book an appointment at the immigration office",
+      "organization": "Organization/Authority name",
+      "orgPlaceholder": "e.g. Immigration office, doctor, school...",
+      "generate": "Generate Script",
+      "generating": "Generating...",
+      "result": "Your Phone Script",
+      "copy": "Copy text"
+    },
+    "letters": {
+      "title": "Write Official Letters",
+      "subtitle": "We write a professional German letter for you",
+      "situation": "What do you want to write?",
+      "situationPlaceholder": "e.g. I need a letter to the job center",
+      "letterType": "Letter Type",
+      "types": {
+        "general": "General Letter",
+        "appointment": "Appointment Request",
+        "complaint": "Complaint",
+        "request": "Official Request",
+        "appeal": "Appeal"
+      },
+      "recipient": "Recipient",
+      "recipientPlaceholder": "e.g. Job center, immigration office...",
+      "generate": "Generate Letter",
+      "generating": "Generating...",
+      "german": "Letter in German",
+      "translation": "Translation",
+      "copy": "Copy",
+      "download": "Download"
+    },
+    "language": {
+      "select": "Select Language",
+      "ar": "Arabic",
+      "de": "German",
+      "en": "English",
+      "tr": "Turkish",
+      "ru": "Russian",
+      "uk": "Ukrainian",
+      "fr": "French",
+      "fa": "Persian"
+    },
+    "common": {
+      "loading": "Loading...",
+      "error": "An error occurred",
+      "retry": "Try again",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "close": "Close",
+      "back": "Back"
+    }
+  }
+}

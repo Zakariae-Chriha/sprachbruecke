@@ -1,0 +1,110 @@
+{
+  "translation": {
+    "appName": "SprachBrücke",
+    "tagline": "Ihr persönlicher Assistent für Behördengänge",
+    "nav": {
+      "home": "Startseite",
+      "chat": "KI-Assistent",
+      "documents": "Dokumente",
+      "calls": "Anruf-Hilfe",
+      "letters": "Briefe",
+      "autocall": "KI-Anruf"
+    },
+    "home": {
+      "welcome": "Willkommen bei SprachBrücke",
+      "subtitle": "Wir helfen Ihnen bei Behörden, Ärzten und offiziellen Briefen auf Deutsch",
+      "features": {
+        "chat": {
+          "title": "KI-Assistent",
+          "desc": "Beschreiben Sie Ihr Problem und wir helfen Schritt für Schritt"
+        },
+        "documents": {
+          "title": "Dokument analysieren",
+          "desc": "Laden Sie einen Brief hoch und wir erklären ihn"
+        },
+        "calls": {
+          "title": "Anruf-Hilfe",
+          "desc": "Wir bereiten ein Telefon-Skript für Sie vor"
+        },
+        "letters": {
+          "title": "Briefe schreiben",
+          "desc": "Wir schreiben professionelle Briefe auf Deutsch"
+        }
+      },
+      "startChat": "Chat starten",
+      "uploadDoc": "Dokument hochladen",
+      "languages": "Verfügbar in 8 Sprachen"
+    },
+    "chat": {
+      "title": "KI-Assistent",
+      "placeholder": "Beschreiben Sie Ihr Problem... (in jeder Sprache)",
+      "send": "Senden",
+      "typing": "Schreibt...",
+      "welcome": "Hallo! Ich bin SprachBrücke. Wie kann ich Ihnen heute helfen?",
+      "error": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+    },
+    "documents": {
+      "title": "Dokument analysieren",
+      "subtitle": "Laden Sie einen Behördenbrief oder ein Dokument hoch",
+      "dropzone": "Datei hierher ziehen oder klicken",
+      "supported": "PDF, JPG, PNG unterstützt (bis 10MB)",
+      "analyzing": "Wird analysiert...",
+      "result": "Analyse-Ergebnis",
+      "uploadAnother": "Weiteres Dokument analysieren"
+    },
+    "calls": {
+      "title": "Anruf-Hilfe",
+      "subtitle": "Wir bereiten ein vollständiges Telefon-Skript vor",
+      "situation": "Beschreiben Sie Ihre Situation",
+      "situationPlaceholder": "z.B. Ich möchte einen Termin bei der Ausländerbehörde buchen",
+      "organization": "Name der Behörde/Institution",
+      "orgPlaceholder": "z.B. Ausländerbehörde, Arzt, Schule...",
+      "generate": "Skript erstellen",
+      "generating": "Wird erstellt...",
+      "result": "Ihr Telefon-Skript",
+      "copy": "Text kopieren"
+    },
+    "letters": {
+      "title": "Briefe schreiben",
+      "subtitle": "Wir schreiben einen professionellen deutschen Brief",
+      "situation": "Was möchten Sie schreiben?",
+      "situationPlaceholder": "z.B. Ich möchte einen Brief ans Jobcenter schreiben",
+      "letterType": "Briefart",
+      "types": {
+        "general": "Allgemeiner Brief",
+        "appointment": "Terminanfrage",
+        "complaint": "Beschwerde",
+        "request": "Offizieller Antrag",
+        "appeal": "Widerspruch"
+      },
+      "recipient": "Empfänger",
+      "recipientPlaceholder": "z.B. Jobcenter, Ausländerbehörde...",
+      "generate": "Brief erstellen",
+      "generating": "Wird erstellt...",
+      "german": "Brief auf Deutsch",
+      "translation": "Übersetzung",
+      "copy": "Kopieren",
+      "download": "Herunterladen"
+    },
+    "language": {
+      "select": "Sprache wählen",
+      "ar": "Arabisch",
+      "de": "Deutsch",
+      "en": "Englisch",
+      "tr": "Türkisch",
+      "ru": "Russisch",
+      "uk": "Ukrainisch",
+      "fr": "Französisch",
+      "fa": "Persisch"
+    },
+    "common": {
+      "loading": "Laden...",
+      "error": "Fehler aufgetreten",
+      "retry": "Erneut versuchen",
+      "copy": "Kopieren",
+      "copied": "Kopiert!",
+      "close": "Schließen",
+      "back": "Zurück"
+    }
+  }
+}

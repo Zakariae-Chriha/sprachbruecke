@@ -1,0 +1,110 @@
+{
+  "translation": {
+    "appName": "SprachBrücke",
+    "tagline": "Alman makamları için kişisel asistanınız",
+    "nav": {
+      "home": "Ana Sayfa",
+      "chat": "YZ Asistanı",
+      "documents": "Belgeler",
+      "calls": "Arama Yardımı",
+      "letters": "Mektuplar",
+      "autocall": "Yapay Zeka Arama"
+    },
+    "home": {
+      "welcome": "SprachBrücke'ye Hoş Geldiniz",
+      "subtitle": "Alman makamları, doktorlar ve resmi yazışmalarda size yardım ediyoruz",
+      "features": {
+        "chat": {
+          "title": "YZ Asistanı",
+          "desc": "Sorununuzu anlatın, adım adım yardım edelim"
+        },
+        "documents": {
+          "title": "Belge Analizi",
+          "desc": "Mektubu yükleyin, açıklayalım"
+        },
+        "calls": {
+          "title": "Arama Yardımı",
+          "desc": "Telefon görüşmesi için senaryo hazırlıyoruz"
+        },
+        "letters": {
+          "title": "Mektup Yaz",
+          "desc": "Profesyonel Almanca mektuplar yazıyoruz"
+        }
+      },
+      "startChat": "Sohbeti Başlat",
+      "uploadDoc": "Belge Yükle",
+      "languages": "8 dilde mevcut"
+    },
+    "chat": {
+      "title": "YZ Asistanı",
+      "placeholder": "Sorununuzu yazın... (herhangi bir dilde)",
+      "send": "Gönder",
+      "typing": "Yazıyor...",
+      "welcome": "Merhaba! Ben SprachBrücke'yim. Bugün size nasıl yardımcı olabilirim?",
+      "error": "Bir hata oluştu. Lütfen tekrar deneyin."
+    },
+    "documents": {
+      "title": "Belge Analizi",
+      "subtitle": "Resmi mektup veya belge yükleyin",
+      "dropzone": "Dosyayı buraya sürükleyin veya seçmek için tıklayın",
+      "supported": "PDF, JPG, PNG desteklenir (10MB'a kadar)",
+      "analyzing": "Analiz ediliyor...",
+      "result": "Analiz Sonucu",
+      "uploadAnother": "Başka belge analiz et"
+    },
+    "calls": {
+      "title": "Telefon Görüşmesi Yardımı",
+      "subtitle": "Eksiksiz bir telefon senaryosu hazırlıyoruz",
+      "situation": "Durumunuzu açıklayın",
+      "situationPlaceholder": "ör. Yabancılar dairesinde randevu almak istiyorum",
+      "organization": "Kurum/Makam adı",
+      "orgPlaceholder": "ör. Yabancılar dairesi, doktor, okul...",
+      "generate": "Senaryo Oluştur",
+      "generating": "Oluşturuluyor...",
+      "result": "Telefon Senaryonuz",
+      "copy": "Metni kopyala"
+    },
+    "letters": {
+      "title": "Resmi Mektup Yaz",
+      "subtitle": "Profesyonel Almanca mektup yazıyoruz",
+      "situation": "Ne yazmak istediğinizi anlatın",
+      "situationPlaceholder": "ör. İş kurumuna bir mektup yazmam gerekiyor",
+      "letterType": "Mektup Türü",
+      "types": {
+        "general": "Genel Mektup",
+        "appointment": "Randevu Talebi",
+        "complaint": "Şikayet",
+        "request": "Resmi Talep",
+        "appeal": "İtiraz"
+      },
+      "recipient": "Alıcı",
+      "recipientPlaceholder": "ör. İş kurumu, yabancılar dairesi...",
+      "generate": "Mektup Oluştur",
+      "generating": "Oluşturuluyor...",
+      "german": "Almanca Mektup",
+      "translation": "Çeviri",
+      "copy": "Kopyala",
+      "download": "İndir"
+    },
+    "language": {
+      "select": "Dil Seçin",
+      "ar": "Arapça",
+      "de": "Almanca",
+      "en": "İngilizce",
+      "tr": "Türkçe",
+      "ru": "Rusça",
+      "uk": "Ukraynaca",
+      "fr": "Fransızca",
+      "fa": "Farsça"
+    },
+    "common": {
+      "loading": "Yükleniyor...",
+      "error": "Bir hata oluştu",
+      "retry": "Tekrar dene",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı!",
+      "close": "Kapat",
+      "back": "Geri"
+    }
+  }
+}

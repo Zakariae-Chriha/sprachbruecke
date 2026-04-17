@@ -1,0 +1,91 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
+const User = require('../models/User');
+
+// POST /api/auth/register
+router.post(
+  '/register',
+  [
+    body('name').trim().notEmpty().withMessage('Name ist erforderlich'),
+    body('email').isEmail().withMessage('Gültige E-Mail erforderlich'),
+    body('password').isLength({ min: 6 }).withMessage('Passwort muss mindestens 6 Zeichen haben'),
+    body('language').notEmpty().withMessage('Sprache ist erforderlich'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    try {
+      const { name, email, password, language } = req.body;
+
+      let user = await User.findOne({ email });
+      if (user) return res.status(400).json({ message: 'E-Mail bereits registriert' });
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      user = new User({ name, email, password: hashedPassword, language });
+      await user.save();
+
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'fallback_secret', {
+        expiresIn: '7d',
+      });
+
+      res.status(201).json({
+        token,
+        user: { id: user._id, name: user.name, email: user.email, language: user.language },
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Serverfehler', error: err.message });
+    }
+  }
+);
+
+// POST /api/auth/login
+router.post(
+  '/login',
+  [
+    body('email').isEmail().withMessage('Gültige E-Mail erforderlich'),
+    body('password').notEmpty().withMessage('Passwort erforderlich'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    try {
+      const { email, password } = req.body;
+
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ message: 'Ungültige Anmeldedaten' });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ message: 'Ungültige Anmeldedaten' });
+
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'fallback_secret', {
+        expiresIn: '7d',
+      });
+
+      res.json({
+        token,
+        user: { id: user._id, name: user.name, email: user.email, language: user.language },
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Serverfehler', error: err.message });
+    }
+  }
+);
+
+// GET /api/auth/me
+router.get('/me', require('../middleware/auth'), async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('-password');
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Serverfehler' });
+  }
+});
+
+module.exports = router;
