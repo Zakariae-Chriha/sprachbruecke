@@ -1,12 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from '../api';
 import toast from 'react-hot-toast';
-import { Send, Bot, User, RefreshCw } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 
 const LANGUAGE_NAMES = {
   ar: 'Arabic', de: 'German', en: 'English', tr: 'Turkish',
   ru: 'Russian', uk: 'Ukrainian', fr: 'French', fa: 'Persian',
+};
+
+const SPEECH_LANG = {
+  ar: 'ar-SA', de: 'de-DE', en: 'en-US', tr: 'tr-TR',
+  ru: 'ru-RU', uk: 'uk-UA', fr: 'fr-FR', fa: 'fa-IR',
 };
 
 export default function Chat() {
@@ -16,8 +21,12 @@ export default function Chat() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,11 +40,28 @@ export default function Chat() {
     return id;
   })[0];
 
-  const sendMessage = async () => {
-    const text = input.trim();
-    if (!text || loading) return;
+  const speak = useCallback((text) => {
+    if (!autoSpeak || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = SPEECH_LANG[i18n.language] || 'en-US';
+    utter.rate = 0.9;
+    utter.onstart = () => setSpeaking(true);
+    utter.onend = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(utter);
+  }, [autoSpeak, i18n.language]);
 
-    const userMsg = { role: 'user', content: text };
+  const stopSpeaking = () => {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+  };
+
+  const sendMessage = async (text) => {
+    const msgText = (text || input).trim();
+    if (!msgText || loading) return;
+
+    const userMsg = { role: 'user', content: msgText };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput('');
@@ -46,7 +72,10 @@ export default function Chat() {
         messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
         userLanguage: LANGUAGE_NAMES[i18n.language] || 'English',
       }, { headers: { 'x-session-id': sessionId } });
-      setMessages([...newMessages, { role: 'assistant', content: res.data.message }]);
+
+      const reply = res.data.message;
+      setMessages([...newMessages, { role: 'assistant', content: reply }]);
+      speak(reply);
     } catch (err) {
       toast.error(t('chat.error'));
       setMessages([...newMessages, { role: 'assistant', content: t('chat.error') }]);
@@ -63,7 +92,39 @@ export default function Chat() {
     }
   };
 
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Spracherkennung nicht unterstützt');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = SPEECH_LANG[i18n.language] || 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => { setListening(false); toast.error('Mikrofon-Fehler'); };
+
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setInput(transcript);
+      sendMessage(transcript);
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+  };
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    setListening(false);
+  };
+
   const resetChat = () => {
+    stopSpeaking();
     setMessages([{ role: 'assistant', content: t('chat.welcome') }]);
     setInput('');
   };
@@ -81,14 +142,33 @@ export default function Chat() {
             <span className="text-xs text-green-600 font-medium">● Online</span>
           </div>
         </div>
-        <button
-          onClick={resetChat}
-          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-          title="Neu starten"
-        >
-          <RefreshCw size={18} />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Auto-speak toggle */}
+          <button
+            onClick={() => { setAutoSpeak(v => !v); stopSpeaking(); }}
+            className={`p-2 rounded-lg transition-all ${autoSpeak ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:bg-gray-50'}`}
+            title={autoSpeak ? 'Lautsprecher an' : 'Lautsprecher aus'}
+          >
+            {autoSpeak ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </button>
+          <button
+            onClick={resetChat}
+            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+            title="Neu starten"
+          >
+            <RefreshCw size={18} />
+          </button>
+        </div>
       </div>
+
+      {/* Speaking indicator */}
+      {speaking && (
+        <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-blue-50 rounded-xl text-blue-600 text-sm">
+          <Volume2 size={16} className="animate-pulse" />
+          <span>Spricht...</span>
+          <button onClick={stopSpeaking} className="ml-auto text-xs underline">Stopp</button>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-4 bg-white rounded-2xl p-4 shadow-sm border border-blue-50">
@@ -111,11 +191,19 @@ export default function Chat() {
               }`}
             >
               {msg.content}
+              {msg.role === 'assistant' && (
+                <button
+                  onClick={() => speak(msg.content)}
+                  className="ml-2 opacity-40 hover:opacity-100 transition-opacity inline-block"
+                  title="Vorlesen"
+                >
+                  <Volume2 size={13} />
+                </button>
+              )}
             </div>
           </div>
         ))}
 
-        {/* Loading indicator */}
         {loading && (
           <div className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-sm">
@@ -135,18 +223,32 @@ export default function Chat() {
 
       {/* Input */}
       <div className="mt-4 flex gap-2">
+        {/* Mic button */}
+        <button
+          onClick={listening ? stopListening : startListening}
+          disabled={loading}
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-md transition-all self-end ${
+            listening
+              ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+          }`}
+          title={listening ? 'Aufnahme stoppen' : 'Spracheingabe'}
+        >
+          {listening ? <MicOff size={18} /> : <Mic size={18} />}
+        </button>
+
         <textarea
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={t('chat.placeholder')}
+          placeholder={listening ? '🎤 Spricht...' : t('chat.placeholder')}
           rows={2}
           className="flex-1 resize-none bg-white border border-blue-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-          disabled={loading}
+          disabled={loading || listening}
         />
         <button
-          onClick={sendMessage}
+          onClick={() => sendMessage()}
           disabled={loading || !input.trim()}
           className="w-12 h-12 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 text-white rounded-2xl flex items-center justify-center shadow-md transition-all self-end"
         >
