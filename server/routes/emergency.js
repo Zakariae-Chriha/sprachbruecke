@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 // POST /api/emergency/call
-// Twilio calls 110 or 112 on behalf of the user, speaking German
 router.post('/call', async (req, res) => {
   try {
-    const { type, address } = req.body;
+    const { type, name, address, coords } = req.body;
 
     if (!address) return res.status(400).json({ message: 'Adresse erforderlich' });
     if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
@@ -17,17 +16,23 @@ router.post('/call', async (req, res) => {
 
     const twilio = require('twilio');
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
-    // German emergency numbers
     const emergencyNumber = type === 'police' ? '+49110' : '+49112';
+
+    const params = new URLSearchParams({
+      address,
+      type: type || 'fire',
+      name: name || '',
+      lat: coords?.lat || '',
+      lon: coords?.lon || '',
+    });
 
     const call = await client.calls.create({
       to: emergencyNumber,
       from: process.env.TWILIO_PHONE_NUMBER,
-      url: `${ngrokUrl}/api/emergency/twiml?address=${encodeURIComponent(address)}&type=${type}`,
+      url: `${ngrokUrl}/api/emergency/twiml?${params.toString()}`,
     });
 
-    console.log(`🆘 Notruf: ${call.sid} → ${emergencyNumber} | ${address}`);
+    console.log(`🆘 Notruf: ${call.sid} → ${emergencyNumber} | ${name} | ${address}`);
     res.json({ success: true, callSid: call.sid });
   } catch (err) {
     console.error('Notruf Fehler:', err.message);
@@ -36,26 +41,40 @@ router.post('/call', async (req, res) => {
 });
 
 // GET /api/emergency/twiml
-// TwiML spoken to emergency services in German
+// The AI introduces itself clearly and repeats the address
 router.get('/twiml', (req, res) => {
   const address = req.query.address || 'unbekannte Adresse';
-  const type = req.query.type || 'fire';
-  const service = type === 'police' ? 'Polizei' : 'Feuerwehr und Rettungsdienst';
+  const type    = req.query.type    || 'fire';
+  const name    = req.query.name    || '';
+  const lat     = req.query.lat     || '';
+  const lon     = req.query.lon     || '';
+
+  const service   = type === 'police' ? 'Polizei' : 'Feuerwehr und Rettungsdienst';
+  const nameIntro = name ? `Mein Name ist ${name}.` : '';
+  const gpsInfo   = lat && lon ? ` GPS-Koordinaten: ${parseFloat(lat).toFixed(5)}, ${parseFloat(lon).toFixed(5)}.` : '';
 
   const { VoiceResponse } = require('twilio').twiml;
   const twiml = new VoiceResponse();
 
+  // Clear introduction — pause between sentences so the operator can understand
   twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
-    `NOTRUF! Diese Person spricht kein Deutsch. Sofort ${service} benötigt!`);
+    `Guten Tag! NOTRUF!`);
   twiml.pause({ length: 1 });
+
   twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
-    `Die Adresse lautet: ${address}.`);
+    `${nameIntro} Ich spreche kein Deutsch. Ich brauche sofort ${service}!`);
   twiml.pause({ length: 1 });
+
   twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
-    `Ich wiederhole die Adresse: ${address}. Bitte sofort Hilfe schicken!`);
+    `Meine Adresse lautet: ${address}.${gpsInfo}`);
+  twiml.pause({ length: 1 });
+
+  twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
+    `Ich wiederhole: ${nameIntro} Adresse: ${address}. Bitte sofort kommen!`);
   twiml.pause({ length: 2 });
+
   twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' },
-    `Nochmals: ${address}. Danke.`);
+    `Nochmals die Adresse: ${address}. Vielen Dank.`);
   twiml.hangup();
 
   res.type('text/xml');
