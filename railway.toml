@@ -1,6 +1,7 @@
 [build]
 builder = "nixpacks"
+buildCommand = "npm install --prefix server"
 
 [deploy]
-startCommand = "node app.js"
+startCommand = "node server/app.js"
 restartPolicyType = "on_failure"
