@@ -6,8 +6,8 @@ import toast from 'react-hot-toast';
 import { Upload, FileText, Loader2, RotateCcw, Copy, CheckCircle } from 'lucide-react';
 
 const LANGUAGE_NAMES = {
-  ar: 'Arabisch', de: 'Deutsch', en: 'Englisch', tr: 'Türkisch',
-  ru: 'Russisch', uk: 'Ukrainisch', fr: 'Französisch', fa: 'Persisch',
+  ar: 'Arabic', de: 'German', en: 'English', tr: 'Turkish',
+  ru: 'Russian', uk: 'Ukrainian', fr: 'French', fa: 'Persian',
 };
 
 export default function DocumentScan() {

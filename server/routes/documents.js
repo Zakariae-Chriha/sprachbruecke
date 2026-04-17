@@ -73,20 +73,20 @@ router.post('/upload', upload.single('document'), async (req, res) => {
     }
 
     // Dokument mit KI analysieren
-    const analysisPrompt = `Du bist SprachBrücke. Analysiere folgendes deutsches Behördendokument und erkläre es auf ${language}:
+    const analysisPrompt = `You are SprachBrücke. Analyze the following document and explain it ENTIRELY in ${language}. Do NOT use any other language in your response.
 
-DOKUMENT:
+DOCUMENT:
 ${extractedText.substring(0, 3000)}
 
-Deine Antwort soll enthalten:
-1. **Was ist das für ein Dokument?** (Art/Typ)
-2. **Von welcher Behörde?**
-3. **Was steht drin?** (Hauptinhalt, einfach erklärt)
-4. **Was muss die Person tun?** (Fristen, Aktionen, Antworten)
-5. **Wie dringend ist es?** (sofort, diese Woche, diesen Monat)
-6. **Welche Dokumente werden eventuell gebraucht?**
+Your response must be written ONLY in ${language} and include:
+1. **What type of document is this?**
+2. **Which authority/institution sent it?**
+3. **What does it say?** (main content, explained simply)
+4. **What does the person need to do?** (deadlines, actions, responses)
+5. **How urgent is it?** (immediately, this week, this month)
+6. **What documents might be needed?**
 
-Antworte vollständig auf ${language}. Benutze einfache, klare Sprache.`;
+IMPORTANT: Write your ENTIRE response in ${language} only. Do not mix languages.`;
 
     const analysisResponse = await openai.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
