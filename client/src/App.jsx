@@ -8,6 +8,7 @@ import DocumentScan from './pages/DocumentScan';
 import CallHelper from './pages/CallHelper';
 import Letters from './pages/Letters';
 import AutoCall from './pages/AutoCall';
+import Emergency from './pages/Emergency';
 
 // RTL-Sprachen
 const RTL_LANGUAGES = ['ar', 'fa', 'ku', 'he', 'ur'];
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/calls" element={<CallHelper />} />
         <Route path="/letters" element={<Letters />} />
         <Route path="/autocall" element={<AutoCall />} />
+        <Route path="/emergency" element={<Emergency />} />
       </Routes>
     </Layout>
   );

@@ -36,6 +36,7 @@ app.use('/api/documents', require('./routes/documents'));
 app.use('/api/translate', require('./routes/translate'));
 app.use('/api/calls', require('./routes/calls'));
 app.use('/api/autocall', require('./routes/autocall'));
+app.use('/api/emergency', require('./routes/emergency'));
 
 // Health Check
 app.get('/api/health', (req, res) => {

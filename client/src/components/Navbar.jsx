@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, MessageCircle, FileText, Phone, Mail, PhoneCall } from 'lucide-react';
+import { Home, MessageCircle, FileText, Phone, Mail, PhoneCall, Siren } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 
 const NAV_ITEMS = [
@@ -50,6 +50,17 @@ export default function Navbar() {
             })}
           </div>
 
+          <Link
+            to="/emergency"
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+              location.pathname === '/emergency'
+                ? 'bg-red-600 text-white'
+                : 'bg-red-100 text-red-700 hover:bg-red-200'
+            }`}
+          >
+            <Siren size={15} />
+            <span>SOS</span>
+          </Link>
           <LanguageSelector compact />
         </div>
       </nav>
@@ -86,6 +97,16 @@ export default function Navbar() {
               </Link>
             );
           })}
+          {/* SOS emergency button — always red */}
+          <Link
+            to="/emergency"
+            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-all ${
+              location.pathname === '/emergency' ? 'text-red-700' : 'text-red-500'
+            }`}
+          >
+            <Siren size={20} />
+            <span className="text-xs font-bold">SOS</span>
+          </Link>
         </div>
       </nav>
     </>
