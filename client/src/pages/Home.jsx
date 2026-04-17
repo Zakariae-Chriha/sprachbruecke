@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Siren } from 'lucide-react';
+import Bridge3D from '../components/Bridge3D';
 
 const LANGUAGES = [
   { code: 'ar', flag: '🇸🇦', label: 'العربية' },
@@ -81,8 +82,8 @@ export default function Home() {
     <div>
       {/* ── Hero ── */}
       <div className="fade-in text-center pt-2 pb-6">
-        <div className="text-5xl mb-4 select-none" style={{ filter: 'drop-shadow(0 4px 12px rgba(37,99,235,0.15))' }}>
-          🌉
+        <div className="flex justify-center mb-2">
+          <Bridge3D size={300} />
         </div>
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
           {t('home.welcome')}
