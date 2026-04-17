@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 
@@ -14,26 +15,55 @@ const LANGUAGES = [
 
 export default function LanguageSelector({ compact = false }) {
   const { i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
 
   const handleChange = (code) => {
     i18n.changeLanguage(code);
+    setOpen(false);
   };
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const current = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[2];
 
   if (compact) {
     return (
-      <div className="flex items-center gap-1">
-        <Globe size={16} className="text-blue-300" />
-        <select
-          value={i18n.language}
-          onChange={(e) => handleChange(e.target.value)}
-          className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+      <div className="relative" ref={ref}>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-indigo-50 transition-all text-slate-600 hover:text-indigo-600"
         >
-          {LANGUAGES.map((lang) => (
-            <option key={lang.code} value={lang.code} className="text-gray-800 bg-white">
-              {lang.flag} {lang.label}
-            </option>
-          ))}
-        </select>
+          <Globe size={16} />
+          <span className="text-sm font-medium">{current.flag} {current.label}</span>
+        </button>
+
+        {open && (
+          <div className="absolute right-0 top-10 z-50 bg-white rounded-2xl shadow-xl border border-indigo-100 p-2 w-48"
+            style={{ animation: 'fadeIn 0.15s ease' }}>
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleChange(lang.code)}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                  i18n.language === lang.code
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-slate-600 hover:bg-indigo-50 hover:text-indigo-600'
+                }`}
+              >
+                <span className="text-lg">{lang.flag}</span>
+                <span>{lang.label}</span>
+                {i18n.language === lang.code && <span className="ml-auto text-indigo-400">✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
