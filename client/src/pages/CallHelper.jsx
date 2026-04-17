@@ -5,8 +5,8 @@ import toast from 'react-hot-toast';
 import { Phone, Loader2, Copy, CheckCircle, Search } from 'lucide-react';
 
 const LANGUAGE_NAMES = {
-  ar: 'Arabisch', de: 'Deutsch', en: 'Englisch', tr: 'Türkisch',
-  ru: 'Russisch', uk: 'Ukrainisch', fr: 'Französisch', fa: 'Persisch',
+  ar: 'Arabic', de: 'German', en: 'English', tr: 'Turkish',
+  ru: 'Russian', uk: 'Ukrainian', fr: 'French', fa: 'Persian',
 };
 
 const QUICK_ORGS = [

@@ -305,7 +305,7 @@ async function generateSummary(callSid) {
   if (!callData || callData.summary) return;
 
   try {
-    const lang = callData.userLanguage || 'Arabisch';
+    const lang = callData.userLanguage || 'Arabic';
     const conversation = callData.history
       .map(m => `${m.role === 'assistant' ? 'KI-Assistent (Deutsch)' : 'Behörde'}: ${m.content}`)
       .join('\n');
