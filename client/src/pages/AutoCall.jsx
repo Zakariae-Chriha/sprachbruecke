@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import axios from '../api';
 import toast from 'react-hot-toast';
 import { Phone, PhoneCall, PhoneOff, Loader2, CheckCircle, User, Hash, Target, Building2, Copy } from 'lucide-react';
 

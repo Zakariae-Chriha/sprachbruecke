@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDropzone } from 'react-dropzone';
-import axios from 'axios';
+import axios from '../api';
 import toast from 'react-hot-toast';
 import { Upload, FileText, Loader2, RotateCcw, Copy, CheckCircle } from 'lucide-react';
 

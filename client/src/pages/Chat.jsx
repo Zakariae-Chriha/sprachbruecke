@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import axios from '../api';
 import toast from 'react-hot-toast';
 import { Send, Bot, User, RefreshCw } from 'lucide-react';
 
