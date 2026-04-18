@@ -164,7 +164,9 @@ router.post('/forgot-password', async (req, res) => {
     const clientUrl = process.env.CLIENT_URL || 'https://sprachbruecke-psi.vercel.app';
     const resetUrl = `${clientUrl}/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;
 
-    await sendPasswordResetEmail(user.email, user.name, resetUrl);
+    sendPasswordResetEmail(user.email, user.name, resetUrl).catch(err =>
+      console.error('Reset-Email Fehler:', err.message)
+    );
     res.json({ message: 'Falls die E-Mail existiert, wurde ein Link gesendet.' });
   } catch (err) {
     res.status(500).json({ message: 'Serverfehler', error: err.message });
