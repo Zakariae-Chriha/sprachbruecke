@@ -66,6 +66,7 @@ app.use('/api/autocall', callLimiter, require('./routes/autocall'));
 app.use('/api/emergency', callLimiter, require('./routes/emergency'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/stripe', require('./routes/stripe'));
+app.use('/api/scanner', aiLimiter, require('./routes/scanner'));
 
 // Health Check
 app.get('/api/health', (req, res) => {

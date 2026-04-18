@@ -18,6 +18,8 @@ import UpgradeCancel from './pages/UpgradeCancel';
 import History from './pages/History';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Scanner from './pages/Scanner';
+import Tasks from './pages/Tasks';
 
 const RTL_LANGUAGES = ['ar', 'fa', 'ku', 'he', 'ur'];
 
@@ -49,6 +51,8 @@ export default function App() {
         <Route path="/history" element={<History />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/scanner" element={<Scanner />} />
+        <Route path="/tasks" element={<Tasks />} />
       </Routes>
     </Layout>
   );

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Home, MessageCircle, FileText, Phone,
   Mail, PhoneCall, Siren, Globe, User, LogOut, ShieldCheck, History,
+  Camera, ClipboardList,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -24,6 +25,8 @@ const NAV = [
   { path: '/documents', icon: FileText,      key: 'documents' },
   { path: '/autocall',  icon: PhoneCall,     key: 'autocall' },
   { path: '/calls',     icon: Phone,         key: 'calls' },
+  { path: '/scanner',   icon: Camera,        key: 'scanner',  label: 'Scanner' },
+  { path: '/tasks',     icon: ClipboardList, key: 'tasks',    label: 'Aufgaben' },
 ];
 
 function UserMenu() {
@@ -151,14 +154,14 @@ export default function Navbar() {
 
           {/* Links */}
           <div className="flex items-center gap-1">
-            {NAV.map(({ path, icon: Icon, key }) => (
+            {NAV.map(({ path, icon: Icon, key, label }) => (
               <Link
                 key={path}
                 to={path}
                 className={`nav-link-desktop ${location.pathname === path ? 'active' : ''}`}
               >
                 <Icon size={16} />
-                {t(`nav.${key}`)}
+                {label || t(`nav.${key}`)}
               </Link>
             ))}
             <Link to="/letters" className={`nav-link-desktop ${location.pathname === '/letters' ? 'active' : ''}`}>
@@ -194,14 +197,14 @@ export default function Navbar() {
 
       {/* ── Mobile bottom bar ── */}
       <nav className="md:hidden navbar-bottom">
-        {NAV.map(({ path, icon: Icon, key }) => (
+        {NAV.map(({ path, icon: Icon, key, label }) => (
           <Link
             key={path}
             to={path}
             className={`nav-item ${location.pathname === path ? 'active' : ''}`}
           >
             <Icon size={22} />
-            <span>{t(`nav.${key}`)}</span>
+            <span>{label || t(`nav.${key}`)}</span>
           </Link>
         ))}
         <Link to="/emergency" className="nav-item-sos">
