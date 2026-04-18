@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563EB"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#bg)"/>
+  <!-- Bridge towers -->
+  <rect x="140" y="200" width="28" height="180" rx="8" fill="white" opacity="0.95"/>
+  <rect x="344" y="200" width="28" height="180" rx="8" fill="white" opacity="0.95"/>
+  <!-- Bridge deck -->
+  <rect x="100" y="340" width="312" height="22" rx="11" fill="white" opacity="0.9"/>
+  <!-- Bridge cables left -->
+  <line x1="154" y1="210" x2="120" y2="340" stroke="white" stroke-width="5" opacity="0.8"/>
+  <line x1="154" y1="210" x2="180" y2="340" stroke="white" stroke-width="5" opacity="0.8"/>
+  <line x1="154" y1="210" x2="240" y2="340" stroke="white" stroke-width="5" opacity="0.8"/>
+  <!-- Bridge cables right -->
+  <line x1="358" y1="210" x2="392" y2="340" stroke="white" stroke-width="5" opacity="0.8"/>
+  <line x1="358" y1="210" x2="332" y2="340" stroke="white" stroke-width="5" opacity="0.8"/>
+  <line x1="358" y1="210" x2="272" y2="340" stroke="white" stroke-width="5" opacity="0.8"/>
+  <!-- Tower tops -->
+  <rect x="132" y="185" width="44" height="20" rx="6" fill="white" opacity="0.95"/>
+  <rect x="336" y="185" width="44" height="20" rx="6" fill="white" opacity="0.95"/>
+  <!-- SB text -->
+  <text x="256" y="168" font-family="Arial,sans-serif" font-size="72" font-weight="900" fill="white" text-anchor="middle" opacity="0.95">SB</text>
+</svg>

@@ -93,29 +93,69 @@ export default function Home() {
         </p>
 
         {/* ── App explanation box ── */}
-        <div style={{
-          background: 'white',
-          border: '1px solid #E8EDF5',
-          borderRadius: '20px',
-          boxShadow: '0 2px 16px rgba(37,99,235,0.07)',
-          padding: '20px 20px',
-          maxWidth: '480px',
-          margin: '0 auto',
-          textAlign: i18n.language === 'ar' || i18n.language === 'fa' ? 'right' : 'left',
-          direction: i18n.language === 'ar' || i18n.language === 'fa' ? 'rtl' : 'ltr',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px',
-            flexDirection: i18n.language === 'ar' || i18n.language === 'fa' ? 'row-reverse' : 'row' }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '12px', flexShrink: 0,
-              background: 'linear-gradient(135deg, #2563EB, #7C3AED)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
-            }}>💡</div>
-            <span style={{ fontSize: '13px', fontWeight: '700', color: '#2563EB', letterSpacing: '0.02em' }}>
-              {t('appName')}
-            </span>
+        <style>{`
+          @keyframes sb-gradient {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+          @keyframes sb-border {
+            0%   { border-color: #2563EB; }
+            33%  { border-color: #7C3AED; }
+            66%  { border-color: #059669; }
+            100% { border-color: #2563EB; }
+          }
+          @keyframes sb-dot1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+          @keyframes sb-dot2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+          @keyframes sb-dot3 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+          .sb-title {
+            background: linear-gradient(270deg, #2563EB, #7C3AED, #059669, #D97706, #2563EB);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: sb-gradient 4s ease infinite;
+            font-size: 15px;
+            font-weight: 800;
+          }
+          .sb-box {
+            border: 2px solid #2563EB;
+            animation: sb-border 5s ease infinite;
+          }
+          .sb-d1 { animation: sb-dot1 1.8s ease-in-out infinite; }
+          .sb-d2 { animation: sb-dot2 1.8s ease-in-out 0.3s infinite; }
+          .sb-d3 { animation: sb-dot3 1.8s ease-in-out 0.6s infinite; }
+        `}</style>
+
+        <div
+          className="sb-box"
+          style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '20px',
+            maxWidth: '480px',
+            margin: '0 auto',
+            textAlign: i18n.language === 'ar' || i18n.language === 'fa' ? 'right' : 'left',
+            direction: i18n.language === 'ar' || i18n.language === 'fa' ? 'rtl' : 'ltr',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Header row */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px',
+            flexDirection: i18n.language === 'ar' || i18n.language === 'fa' ? 'row-reverse' : 'row',
+          }}>
+            <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+              <span className="sb-d1" style={{ display:'inline-block', width:'9px', height:'9px', borderRadius:'50%', background:'#2563EB' }} />
+              <span className="sb-d2" style={{ display:'inline-block', width:'9px', height:'9px', borderRadius:'50%', background:'#7C3AED' }} />
+              <span className="sb-d3" style={{ display:'inline-block', width:'9px', height:'9px', borderRadius:'50%', background:'#059669' }} />
+            </div>
+            <span className="sb-title">{t('appName')}</span>
           </div>
-          <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.7', margin: 0 }}>
+
+          {/* Explanation text */}
+          <p style={{ fontSize: '14px', color: '#334155', lineHeight: '1.8', margin: 0 }}>
             {t('home.explanation')}
           </p>
         </div>

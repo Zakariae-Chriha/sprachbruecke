@@ -339,6 +339,41 @@ textarea.input { resize: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes borderGlow {
+  0%   { border-color: #2563EB; box-shadow: 0 0 0 0 rgba(37,99,235,0.0), 0 2px 20px rgba(37,99,235,0.10); }
+  33%  { border-color: #7C3AED; box-shadow: 0 0 0 0 rgba(124,58,237,0.0), 0 2px 20px rgba(124,58,237,0.13); }
+  66%  { border-color: #059669; box-shadow: 0 0 0 0 rgba(5,150,105,0.0), 0 2px 20px rgba(5,150,105,0.10); }
+  100% { border-color: #2563EB; box-shadow: 0 0 0 0 rgba(37,99,235,0.0), 0 2px 20px rgba(37,99,235,0.10); }
+}
+@keyframes floatDot {
+  0%, 100% { transform: translateY(0px) scale(1); opacity: 0.7; }
+  50%       { transform: translateY(-6px) scale(1.15); opacity: 1; }
+}
+
+.animated-gradient-text {
+  background: linear-gradient(270deg, #2563EB, #7C3AED, #059669, #D97706, #2563EB);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 4s ease infinite;
+}
+.explanation-card {
+  animation: borderGlow 5s ease infinite;
+  border-width: 1.5px !important;
+  border-style: solid !important;
+}
+.float-dot {
+  animation: floatDot 2s ease-in-out infinite;
+}
+.float-dot:nth-child(2) { animation-delay: 0.3s; }
+.float-dot:nth-child(3) { animation-delay: 0.6s; }
+
 .fade-in   { animation: fadeUp 0.4s ease both; }
 .fade-in-fast { animation: fadeIn 0.2s ease both; }
 .stagger-1 { animation: fadeUp 0.4s ease 0.05s both; }
