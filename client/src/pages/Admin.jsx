@@ -30,6 +30,7 @@ export default function Admin() {
   const [calls, setCalls] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resetLink, setResetLink] = useState(null);
 
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
@@ -70,6 +71,13 @@ export default function Admin() {
     } catch { toast.error('Fehler'); }
   };
 
+  const generateResetLink = async (id) => {
+    try {
+      const r = await api.post(`/api/admin/users/${id}/reset-link`);
+      setResetLink(r.data);
+    } catch { toast.error('Fehler'); }
+  };
+
   const deleteUser = async (id, name) => {
     if (!confirm(`Benutzer "${name}" wirklich löschen?`)) return;
     try {
@@ -89,6 +97,7 @@ export default function Admin() {
   );
 
   return (
+    <>
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
 
       {/* ── Header ── */}
@@ -179,6 +188,10 @@ export default function Admin() {
                       background: '#059669', color: 'white', border: 'none', borderRadius: '10px',
                       padding: '8px 14px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
                     }}>Genehmigen</button>
+                    <button onClick={() => generateResetLink(u._id)} style={{
+                      background: '#EFF6FF', color: '#2563EB', border: '1px solid #DBEAFE',
+                      borderRadius: '10px', padding: '8px 12px', fontSize: '16px', cursor: 'pointer',
+                    }} title="Reset-Link generieren">🔑</button>
                     <button onClick={() => deleteUser(u._id, u.name)} style={{
                       background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA',
                       borderRadius: '10px', padding: '8px 12px', fontSize: '16px', cursor: 'pointer',
@@ -214,6 +227,10 @@ export default function Admin() {
                     <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0 }}>{u.callsThisMonth ?? 0}/{u.freeCallsLimit ?? 3} Anrufe diesen Monat</p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                    <button onClick={() => generateResetLink(u._id)} style={{
+                      background: '#EFF6FF', color: '#2563EB', border: '1px solid #DBEAFE',
+                      borderRadius: '10px', padding: '8px 12px', fontSize: '16px', cursor: 'pointer',
+                    }} title="Reset-Link generieren">🔑</button>
                     <button onClick={() => revoke(u._id)} style={{
                       background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA',
                       borderRadius: '10px', padding: '8px 12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
@@ -301,5 +318,48 @@ export default function Admin() {
 
       <div style={{ height: '24px' }} />
     </div>
+
+    {/* Reset-Link Modal */}
+
+    {resetLink && (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
+      }}>
+        <div style={{
+          background: 'white', borderRadius: '24px', padding: '28px',
+          width: '100%', maxWidth: '480px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+            <div style={{ fontSize: '36px', marginBottom: '8px' }}>🔑</div>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#1E293B' }}>Reset-Link für {resetLink.name}</h3>
+            <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#94A3B8' }}>{resetLink.email}</p>
+          </div>
+          <div style={{
+            background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px',
+            padding: '12px', marginBottom: '16px', wordBreak: 'break-all',
+            fontSize: '12px', color: '#475569', lineHeight: '1.6',
+          }}>
+            {resetLink.resetUrl}
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => { navigator.clipboard.writeText(resetLink.resetUrl); toast.success('Link kopiert!'); }} style={{
+              flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
+              background: '#2563EB', color: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+            }}>📋 Link kopieren</button>
+            <button onClick={() => setResetLink(null)} style={{
+              padding: '12px 20px', borderRadius: '12px', border: '1px solid #E2E8F0',
+              background: 'white', color: '#64748B', fontWeight: '600', fontSize: '14px', cursor: 'pointer',
+            }}>Schließen</button>
+          </div>
+          <p style={{ textAlign: 'center', fontSize: '11px', color: '#94A3B8', marginTop: '12px' }}>
+            Link per WhatsApp oder Email an den User schicken · Gültig 24 Stunden
+          </p>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

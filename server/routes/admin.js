@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const requireAdmin = require('../middleware/requireAdmin');
 const User = require('../models/User');
 const CallLog = require('../models/CallLog');
@@ -47,6 +48,23 @@ router.patch('/users/:id/revoke', requireAdmin, async (req, res) => {
     if (!user) return res.status(404).json({ message: 'Benutzer nicht gefunden' });
     console.log(`🚫 Zugriff gesperrt: ${user.email}`);
     res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Serverfehler', error: err.message });
+  }
+});
+
+// POST /api/admin/users/:id/reset-link — generate password reset link for user
+router.post('/users/:id/reset-link', requireAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 24 * 60 * 60 * 1000; // 24h
+    await user.save();
+    const clientUrl = process.env.CLIENT_URL || 'https://sprachbruecke-psi.vercel.app';
+    const resetUrl = `${clientUrl}/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;
+    res.json({ resetUrl, email: user.email, name: user.name });
   } catch (err) {
     res.status(500).json({ message: 'Serverfehler', error: err.message });
   }
