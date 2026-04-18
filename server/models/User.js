@@ -49,6 +49,8 @@ const userSchema = new mongoose.Schema(
     },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
     chatHistory: [
       {
         role: { type: String, enum: ['user', 'assistant'] },

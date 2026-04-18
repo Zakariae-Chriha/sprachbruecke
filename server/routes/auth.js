@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const { sendPasswordResetEmail } = require('../utils/mailer');
 
 // POST /api/auth/register
 router.post(
@@ -144,5 +146,53 @@ async function initAdmin(req, res) {
 
 router.get('/init-admin', initAdmin);
 router.post('/init-admin', initAdmin);
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'E-Mail erforderlich' });
+  try {
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    // Always respond OK to prevent email enumeration
+    if (!user) return res.json({ message: 'Falls die E-Mail existiert, wurde ein Link gesendet.' });
+
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+    await user.save();
+
+    const clientUrl = process.env.CLIENT_URL || 'https://sprachbruecke-psi.vercel.app';
+    const resetUrl = `${clientUrl}/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;
+
+    await sendPasswordResetEmail(user.email, user.name, resetUrl);
+    res.json({ message: 'Falls die E-Mail existiert, wurde ein Link gesendet.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Serverfehler', error: err.message });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  const { email, token, password } = req.body;
+  if (!email || !token || !password) return res.status(400).json({ message: 'Fehlende Felder' });
+  if (password.length < 6) return res.status(400).json({ message: 'Passwort muss mindestens 6 Zeichen haben' });
+  try {
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+    if (!user) return res.status(400).json({ message: 'Link ungültig oder abgelaufen.' });
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Passwort erfolgreich geändert.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Serverfehler', error: err.message });
+  }
+});
 
 module.exports = router;

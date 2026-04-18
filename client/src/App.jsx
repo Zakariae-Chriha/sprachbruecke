@@ -16,6 +16,8 @@ import Admin from './pages/Admin';
 import UpgradeSuccess from './pages/UpgradeSuccess';
 import UpgradeCancel from './pages/UpgradeCancel';
 import History from './pages/History';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const RTL_LANGUAGES = ['ar', 'fa', 'ku', 'he', 'ur'];
 
@@ -45,6 +47,8 @@ export default function App() {
         <Route path="/upgrade/success" element={<UpgradeSuccess />} />
         <Route path="/upgrade/cancel" element={<UpgradeCancel />} />
         <Route path="/history" element={<History />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Layout>
   );

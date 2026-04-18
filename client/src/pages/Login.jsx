@@ -97,7 +97,12 @@ export default function Login() {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', fontSize: '13px', color: '#94A3B8', marginTop: '20px' }}>
+        <p style={{ textAlign: 'center', fontSize: '13px', color: '#94A3B8', marginTop: '16px' }}>
+          <Link to="/forgot-password" style={{ color: '#94A3B8', textDecoration: 'none' }}>
+            Passwort vergessen?
+          </Link>
+        </p>
+        <p style={{ textAlign: 'center', fontSize: '13px', color: '#94A3B8', marginTop: '8px' }}>
           Noch kein Konto?{' '}
           <Link to="/register" style={{ color: '#2563EB', fontWeight: '600', textDecoration: 'none' }}>
             Registrieren
