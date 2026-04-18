@@ -214,6 +214,9 @@ export default function Emergency() {
   const [listeningFor, setListeningFor] = useState(null); // 'name' | 'address' | null
   const [calling, setCalling] = useState(null);
   const [phraseType, setPhraseType] = useState('police');
+  const [pinModal, setPinModal] = useState(null); // 'police' | 'fire' | null
+  const [pinValue, setPinValue] = useState('');
+  const [pinError, setPinError] = useState(false);
   const recognitionRef = useRef(null);
 
   const speak = useCallback((text, voiceLang) => {
@@ -275,25 +278,39 @@ export default function Emergency() {
 
   const stopListening = () => { recognitionRef.current?.stop(); setListeningFor(null); };
 
-  const callEmergency = async (type) => {
+  const openPinModal = (type) => {
     if (!name.trim()) { toast.error(txt.noName); return; }
     if (!address.trim()) { toast.error(txt.noAddress); return; }
+    setPinValue('');
+    setPinError(false);
+    setPinModal(type);
+  };
+
+  const callEmergency = async (type, pin) => {
     setCalling(type);
+    setPinModal(null);
     try {
       await axios.post('/api/emergency/call', {
-        type, name, address,
+        type, name, address, pin,
         coords: coords ? { lat: coords.lat, lon: coords.lon } : null,
       });
       toast.success(txt.called);
     } catch (err) {
       if (err.response?.status === 402) {
         handleLimitReached(err.response.data);
+      } else if (err.response?.status === 403) {
+        toast.error('❌ Falscher PIN');
       } else {
         toast.error('Verbindungsfehler');
       }
     } finally {
       setCalling(null);
     }
+  };
+
+  const confirmPin = () => {
+    if (!pinValue.trim()) { setPinError(true); return; }
+    callEmergency(pinModal, pinValue.trim());
   };
 
   const germanPhrase = (name.trim() || address.trim())
@@ -461,7 +478,7 @@ export default function Emergency() {
             <p className="text-xs text-gray-400 text-center mb-4">{txt.aiCallNote}</p>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => callEmergency('police')}
+                onClick={() => openPinModal('police')}
                 disabled={!!calling}
                 className="flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold text-sm transition-all"
               >
@@ -469,7 +486,7 @@ export default function Emergency() {
                 {calling === 'police' ? txt.calling : '🚔 110'}
               </button>
               <button
-                onClick={() => callEmergency('fire')}
+                onClick={() => openPinModal('fire')}
                 disabled={!!calling}
                 className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold text-sm transition-all"
               >
@@ -481,6 +498,59 @@ export default function Emergency() {
         </AuthWall>
       )}
     </div>
+
+    {/* ── PIN Modal ── */}
+    {pinModal && (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
+      }}>
+        <div style={{
+          background: 'white', borderRadius: '24px', padding: '32px 28px',
+          width: '100%', maxWidth: '340px', textAlign: 'center',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+        }}>
+          <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔐</div>
+          <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1E293B', margin: '0 0 6px' }}>
+            PIN eingeben
+          </h2>
+          <p style={{ fontSize: '13px', color: '#94A3B8', margin: '0 0 20px' }}>
+            {pinModal === 'police' ? '🚔 Polizei 110' : '🚒 Feuerwehr 112'}
+          </p>
+          <input
+            type="password"
+            inputMode="numeric"
+            autoFocus
+            value={pinValue}
+            onChange={e => { setPinValue(e.target.value); setPinError(false); }}
+            onKeyDown={e => e.key === 'Enter' && confirmPin()}
+            placeholder="••••"
+            style={{
+              width: '100%', fontSize: '24px', letterSpacing: '0.3em', textAlign: 'center',
+              padding: '14px', borderRadius: '14px', border: pinError ? '2px solid #EF4444' : '2px solid #E2E8F0',
+              outline: 'none', marginBottom: '8px', background: '#F8FAFC',
+            }}
+          />
+          {pinError && (
+            <p style={{ fontSize: '12px', color: '#EF4444', margin: '0 0 12px' }}>PIN darf nicht leer sein</p>
+          )}
+          <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+            <button onClick={() => setPinModal(null)} style={{
+              flex: 1, padding: '13px', borderRadius: '12px', border: '2px solid #E2E8F0',
+              background: 'white', color: '#64748B', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+            }}>Abbrechen</button>
+            <button onClick={confirmPin} style={{
+              flex: 1, padding: '13px', borderRadius: '12px', border: 'none',
+              background: pinModal === 'police' ? '#1D4ED8' : '#DC2626',
+              color: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+            }}>
+              {pinModal === 'police' ? '🚔 Anrufen' : '🚒 Anrufen'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 }

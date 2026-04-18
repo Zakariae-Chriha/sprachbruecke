@@ -7,7 +7,14 @@ const CallLog = require('../models/CallLog');
 // POST /api/emergency/call
 router.post('/call', requireApproved, checkCallLimit, async (req, res) => {
   try {
-    const { type, name, address, coords } = req.body;
+    const { type, name, address, coords, pin } = req.body;
+
+    const emergencyPin = process.env.EMERGENCY_PIN;
+    if (emergencyPin) {
+      if (!pin || String(pin).trim() !== String(emergencyPin).trim()) {
+        return res.status(403).json({ message: 'Falscher PIN. Notruf abgebrochen.' });
+      }
+    }
 
     if (!address) return res.status(400).json({ message: 'Adresse erforderlich' });
     if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
