@@ -5,7 +5,7 @@ const requireAuth = require('../middleware/auth');
 const CallLog = require('../models/CallLog');
 
 const openai = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY,
+  apiKey: process.env.GROQ_API_KEY,
   baseURL: 'https://api.groq.com/openai/v1',
 });
 
