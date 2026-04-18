@@ -16,56 +16,90 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form.email.trim(), form.password);
-      navigate(from, { replace: true });
+      const user = await login(form.email.trim(), form.password);
+      if (user.role === 'admin') navigate('/admin', { replace: true });
+      else navigate(from, { replace: true });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Anmeldung fehlgeschlagen');
+      toast.error(err.response?.data?.message || 'E-Mail oder Passwort falsch');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center">
-      <div className="card w-full max-w-sm">
-        <div className="text-center mb-6">
-          <div className="text-4xl mb-2">🌉</div>
-          <h1 className="text-xl font-bold text-slate-800">Anmelden</h1>
-          <p className="text-sm text-slate-500 mt-1">SprachBrücke Konto</p>
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div style={{
+        background: 'white',
+        borderRadius: '24px',
+        boxShadow: '0 8px 40px rgba(37,99,235,0.13)',
+        padding: '40px 32px',
+        width: '100%',
+        maxWidth: '400px',
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div style={{
+            width: '64px', height: '64px', borderRadius: '18px',
+            background: 'linear-gradient(135deg, #2563EB, #7C3AED)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '28px', margin: '0 auto 14px',
+            boxShadow: '0 8px 20px rgba(37,99,235,0.3)',
+          }}>🌉</div>
+          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#0F172A', margin: '0 0 4px' }}>
+            Willkommen zurück
+          </h1>
+          <p style={{ fontSize: '14px', color: '#94A3B8', margin: 0 }}>
+            Melde dich bei SprachBrücke an
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="section-label mb-1 block">E-Mail</label>
+        <form onSubmit={handleSubmit}>
+          {/* Email */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748B', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>
+              E-MAIL
+            </label>
             <input
               type="email"
-              className="input w-full"
+              className="input"
+              style={{ width: '100%' }}
               placeholder="name@email.com"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
               required
+              autoFocus
             />
           </div>
-          <div>
-            <label className="section-label mb-1 block">Passwort</label>
+
+          {/* Password */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748B', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>
+              PASSWORT
+            </label>
             <input
               type="password"
-              className="input w-full"
-              placeholder="••••••"
+              className="input"
+              style={{ width: '100%' }}
+              placeholder="••••••••"
               value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
               required
             />
           </div>
 
-          <button type="submit" className="btn btn-blue w-full mt-2" disabled={loading}>
-            {loading ? 'Wird angemeldet…' : 'Anmelden'}
+          <button
+            type="submit"
+            className="btn btn-blue"
+            style={{ width: '100%', fontSize: '15px', padding: '14px' }}
+            disabled={loading}
+          >
+            {loading ? 'Wird angemeldet…' : 'Anmelden →'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-500 mt-4">
+        <p style={{ textAlign: 'center', fontSize: '13px', color: '#94A3B8', marginTop: '20px' }}>
           Noch kein Konto?{' '}
-          <Link to="/register" className="text-blue-600 font-medium hover:underline">
+          <Link to="/register" style={{ color: '#2563EB', fontWeight: '600', textDecoration: 'none' }}>
             Registrieren
           </Link>
         </p>
