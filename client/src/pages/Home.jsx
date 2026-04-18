@@ -81,16 +81,44 @@ export default function Home() {
   return (
     <div>
       {/* ── Hero ── */}
-      <div className="fade-in text-center pt-2 pb-6">
+      <div className="fade-in text-center pt-2 pb-4">
         <div className="flex justify-center mb-2">
           <Bridge3D size={380} />
         </div>
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
           {t('home.welcome')}
         </h1>
-        <p className="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
+        <p className="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto mb-4">
           {t('home.subtitle')}
         </p>
+
+        {/* ── App explanation box ── */}
+        <div style={{
+          background: 'white',
+          border: '1px solid #E8EDF5',
+          borderRadius: '20px',
+          boxShadow: '0 2px 16px rgba(37,99,235,0.07)',
+          padding: '20px 20px',
+          maxWidth: '480px',
+          margin: '0 auto',
+          textAlign: i18n.language === 'ar' || i18n.language === 'fa' ? 'right' : 'left',
+          direction: i18n.language === 'ar' || i18n.language === 'fa' ? 'rtl' : 'ltr',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px',
+            flexDirection: i18n.language === 'ar' || i18n.language === 'fa' ? 'row-reverse' : 'row' }}>
+            <div style={{
+              width: '36px', height: '36px', borderRadius: '12px', flexShrink: 0,
+              background: 'linear-gradient(135deg, #2563EB, #7C3AED)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+            }}>💡</div>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: '#2563EB', letterSpacing: '0.02em' }}>
+              {t('appName')}
+            </span>
+          </div>
+          <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.7', margin: 0 }}>
+            {t('home.explanation')}
+          </p>
+        </div>
       </div>
 
       {/* ── Language Selector ── */}

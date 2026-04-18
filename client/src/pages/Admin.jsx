@@ -5,12 +5,22 @@ import api from '../api';
 import toast from 'react-hot-toast';
 
 const STATUS_BADGE = {
-  initiated:  { label: 'Gestartet',  color: '#2563EB', bg: '#EFF6FF' },
-  completed:  { label: 'Abgeschlossen', color: '#059669', bg: '#ECFDF5' },
-  failed:     { label: 'Fehlgeschlagen', color: '#DC2626', bg: '#FEF2F2' },
-  'no-answer':{ label: 'Keine Antwort', color: '#D97706', bg: '#FFFBEB' },
-  busy:       { label: 'Besetzt',    color: '#7C3AED', bg: '#F5F3FF' },
+  initiated:   { label: 'Gestartet',       color: '#2563EB', bg: '#EFF6FF' },
+  completed:   { label: 'Abgeschlossen',   color: '#059669', bg: '#ECFDF5' },
+  failed:      { label: 'Fehlgeschlagen',  color: '#DC2626', bg: '#FEF2F2' },
+  'no-answer': { label: 'Keine Antwort',   color: '#D97706', bg: '#FFFBEB' },
+  busy:        { label: 'Besetzt',         color: '#7C3AED', bg: '#F5F3FF' },
 };
+
+function StatCard({ value, label, color, icon }) {
+  return (
+    <div className="card" style={{ padding: '20px 16px', textAlign: 'center' }}>
+      <div style={{ fontSize: '28px', marginBottom: '4px' }}>{icon}</div>
+      <div style={{ fontSize: '26px', fontWeight: '800', color, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '4px', fontWeight: '600' }}>{label}</div>
+    </div>
+  );
+}
 
 export default function Admin() {
   const { user, logout } = useAuth();
@@ -48,7 +58,7 @@ export default function Admin() {
     try {
       const r = await api.patch(`/api/admin/users/${id}/approve`);
       setUsers(u => u.map(x => x._id === id ? r.data : x));
-      toast.success('Benutzer genehmigt ✅');
+      toast.success('Benutzer genehmigt');
     } catch { toast.error('Fehler'); }
   };
 
@@ -56,7 +66,7 @@ export default function Admin() {
     try {
       const r = await api.patch(`/api/admin/users/${id}/revoke`);
       setUsers(u => u.map(x => x._id === id ? r.data : x));
-      toast.success('Zugriff gesperrt 🚫');
+      toast.success('Zugriff gesperrt');
     } catch { toast.error('Fehler'); }
   };
 
@@ -73,52 +83,63 @@ export default function Admin() {
   const approved = users.filter(u => u.isApproved);
 
   if (loading) return (
-    <div className="flex justify-center items-center min-h-[50vh] text-slate-400">Lädt…</div>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh', color: '#94A3B8', fontSize: '15px' }}>
+      Lädt…
+    </div>
   );
 
   return (
-    <div>
-      {/* Header */}
-      <div className="card mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-slate-800">Admin-Panel 🔐</h1>
-          <p className="text-xs text-slate-500">{user?.email}</p>
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+
+      {/* ── Header ── */}
+      <div className="card" style={{
+        padding: '20px 24px',
+        marginBottom: '16px',
+        background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
+        border: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: '44px', height: '44px', borderRadius: '14px',
+            background: 'rgba(255,255,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px',
+          }}>🔐</div>
+          <div>
+            <h1 style={{ fontSize: '18px', fontWeight: '800', color: 'white', margin: 0 }}>Admin-Panel</h1>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>{user?.email}</p>
+          </div>
         </div>
-        <button onClick={logout} className="btn btn-ghost text-sm text-slate-500">Abmelden</button>
+        <button onClick={logout} style={{
+          background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)',
+          color: 'white', borderRadius: '12px', padding: '8px 16px',
+          fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+        }}>Abmelden</button>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-amber-600">{pending.length}</div>
-          <div className="text-xs text-slate-500">Warten</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-green-600">{approved.length}</div>
-          <div className="text-xs text-slate-500">Genehmigt</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-blue-600">{stats?.totalCalls ?? 0}</div>
-          <div className="text-xs text-slate-500">Anrufe gesamt</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-red-600">{stats?.emergencyCalls ?? 0}</div>
-          <div className="text-xs text-slate-500">Notrufe</div>
-        </div>
+      {/* ── Stats grid ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+        <StatCard value={pending.length}          label="Warten"  color="#D97706" icon="⏳" />
+        <StatCard value={approved.length}         label="OK"      color="#059669" icon="✅" />
+        <StatCard value={stats?.totalCalls ?? 0}  label="Anrufe"  color="#2563EB" icon="📞" />
+        <StatCard value={stats?.emergencyCalls ?? 0} label="SOS"  color="#DC2626" icon="🆘" />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-4">
+      {/* ── Tabs ── */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         {[
           { key: 'users', label: `👥 Benutzer (${users.length})` },
           { key: 'calls', label: `📞 Anrufe (${calls.length})` },
         ].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
-              tab === t.key
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'bg-white text-slate-500 border border-slate-200'
-            }`}>
+          <button key={t.key} onClick={() => setTab(t.key)} style={{
+            flex: 1, padding: '12px', borderRadius: '14px',
+            fontSize: '14px', fontWeight: '700', cursor: 'pointer', border: 'none', transition: 'all 0.2s',
+            background: tab === t.key ? '#2563EB' : 'white',
+            color: tab === t.key ? 'white' : '#64748B',
+            boxShadow: tab === t.key ? '0 4px 14px rgba(37,99,235,0.3)' : '0 1px 4px rgba(0,0,0,0.07)',
+          }}>
             {t.label}
           </button>
         ))}
@@ -126,26 +147,42 @@ export default function Admin() {
 
       {/* ── USERS TAB ── */}
       {tab === 'users' && (
-        <div className="flex flex-col gap-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
           {pending.length > 0 && (
             <>
-              <p className="section-label">⏳ Warten auf Genehmigung</p>
+              <p style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94A3B8', marginBottom: '4px' }}>
+                ⏳ Warten auf Genehmigung
+              </p>
               {pending.map(u => (
-                <div key={u._id} className="card flex items-center gap-3"
-                  style={{ border: '1.5px solid #FDE68A' }}>
-                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-700 flex-shrink-0">
+                <div key={u._id} className="card" style={{
+                  padding: '16px', display: 'flex', alignItems: 'center', gap: '12px',
+                  borderColor: '#FDE68A', borderWidth: '1.5px',
+                  background: '#FFFBEB',
+                }}>
+                  <div style={{
+                    width: '44px', height: '44px', borderRadius: '50%',
+                    background: '#FEF3C7', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', fontWeight: '800', fontSize: '18px', color: '#92400E', flexShrink: 0,
+                  }}>
                     {u.name?.[0]?.toUpperCase() || '?'}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-800 text-sm truncate">{u.name}</p>
-                    <p className="text-xs text-slate-400 truncate">{u.email}</p>
-                    <p className="text-xs text-slate-400">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: '700', color: '#1E293B', fontSize: '14px', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.name}</p>
+                    <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.email}</p>
+                    <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0 }}>
                       {new Date(u.createdAt).toLocaleDateString('de-DE')} · {u.callsThisMonth ?? 0}/{u.freeCallsLimit ?? 3} Anrufe
                     </p>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={() => approve(u._id)} className="btn btn-blue text-xs px-2 py-1.5">✅</button>
-                    <button onClick={() => deleteUser(u._id, u.name)} className="btn btn-ghost text-xs px-2 py-1.5 text-red-500">🗑</button>
+                  <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                    <button onClick={() => approve(u._id)} style={{
+                      background: '#059669', color: 'white', border: 'none', borderRadius: '10px',
+                      padding: '8px 14px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+                    }}>Genehmigen</button>
+                    <button onClick={() => deleteUser(u._id, u.name)} style={{
+                      background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA',
+                      borderRadius: '10px', padding: '8px 12px', fontSize: '16px', cursor: 'pointer',
+                    }}>🗑</button>
                   </div>
                 </div>
               ))}
@@ -154,23 +191,37 @@ export default function Admin() {
 
           {approved.length > 0 && (
             <>
-              <p className="section-label mt-2">✅ Genehmigt</p>
+              <p style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94A3B8', marginTop: pending.length > 0 ? '8px' : 0, marginBottom: '4px' }}>
+                ✅ Genehmigt
+              </p>
               {approved.map(u => (
-                <div key={u._id} className="card flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-700 flex-shrink-0">
+                <div key={u._id} className="card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '44px', height: '44px', borderRadius: '50%',
+                    background: '#DCFCE7', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', fontWeight: '800', fontSize: '18px', color: '#166534', flexShrink: 0,
+                  }}>
                     {u.name?.[0]?.toUpperCase() || '?'}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-800 text-sm truncate">{u.name}</p>
-                    <p className="text-xs text-slate-400 truncate">{u.email}</p>
-                    <p className="text-xs text-slate-400">
-                      {u.callsThisMonth ?? 0}/{u.freeCallsLimit ?? 3} Anrufe
-                      {u.subscriptionStatus === 'active' && <span className="text-yellow-500 ml-1">⭐ Premium</span>}
-                    </p>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <p style={{ fontWeight: '700', color: '#1E293B', fontSize: '14px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.name}</p>
+                      {u.subscriptionStatus === 'active' && (
+                        <span style={{ fontSize: '11px', background: '#FEF3C7', color: '#92400E', borderRadius: '6px', padding: '1px 6px', fontWeight: '700', flexShrink: 0 }}>⭐ Premium</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.email}</p>
+                    <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0 }}>{u.callsThisMonth ?? 0}/{u.freeCallsLimit ?? 3} Anrufe diesen Monat</p>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={() => revoke(u._id)} className="btn btn-ghost text-xs px-2 py-1.5 text-red-600">🚫</button>
-                    <button onClick={() => deleteUser(u._id, u.name)} className="btn btn-ghost text-xs px-2 py-1.5 text-slate-400">🗑</button>
+                  <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                    <button onClick={() => revoke(u._id)} style={{
+                      background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA',
+                      borderRadius: '10px', padding: '8px 12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
+                    }}>Sperren</button>
+                    <button onClick={() => deleteUser(u._id, u.name)} style={{
+                      background: '#F8FAFC', color: '#94A3B8', border: '1px solid #E2E8F0',
+                      borderRadius: '10px', padding: '8px 12px', fontSize: '16px', cursor: 'pointer',
+                    }}>🗑</button>
                   </div>
                 </div>
               ))}
@@ -178,47 +229,67 @@ export default function Admin() {
           )}
 
           {users.length === 0 && (
-            <div className="card text-center text-slate-400 py-8">Noch keine Benutzer.</div>
+            <div className="card" style={{ padding: '48px 24px', textAlign: 'center', color: '#94A3B8', fontSize: '14px' }}>
+              <div style={{ fontSize: '32px', marginBottom: '8px' }}>👤</div>
+              Noch keine Benutzer registriert.
+            </div>
           )}
         </div>
       )}
 
       {/* ── CALLS TAB ── */}
       {tab === 'calls' && (
-        <div className="flex flex-col gap-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {calls.length === 0 && (
-            <div className="card text-center text-slate-400 py-8">Noch keine Anrufe.</div>
+            <div className="card" style={{ padding: '48px 24px', textAlign: 'center', color: '#94A3B8', fontSize: '14px' }}>
+              <div style={{ fontSize: '32px', marginBottom: '8px' }}>📞</div>
+              Noch keine Anrufe aufgezeichnet.
+            </div>
           )}
           {calls.map(c => {
             const badge = STATUS_BADGE[c.status] || STATUS_BADGE.initiated;
             return (
-              <div key={c._id} className="card">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{c.type === 'emergency' ? '🆘' : '🤖'}</span>
+              <div key={c._id} className="card" style={{ padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
+                      background: c.type === 'emergency' ? '#FEF2F2' : '#EFF6FF',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
+                    }}>
+                      {c.type === 'emergency' ? '🆘' : '🤖'}
+                    </div>
                     <div>
-                      <p className="font-semibold text-slate-800 text-sm">{c.userName}</p>
-                      <p className="text-xs text-slate-400">{c.userEmail}</p>
+                      <p style={{ fontWeight: '700', color: '#1E293B', fontSize: '14px', margin: '0 0 2px' }}>{c.userName}</p>
+                      <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>{c.userEmail}</p>
                     </div>
                   </div>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ color: badge.color, background: badge.bg }}>
+                  <span style={{
+                    fontSize: '11px', fontWeight: '700', padding: '4px 10px',
+                    borderRadius: '99px', color: badge.color, background: badge.bg, flexShrink: 0,
+                  }}>
                     {badge.label}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px solid #F1F5F9' }}>
                   <div>
-                    <p className="text-xs text-slate-500">{c.purpose || c.emergencyType}</p>
-                    <p className="text-xs text-slate-400">
+                    {(c.purpose || c.emergencyType) && (
+                      <p style={{ fontSize: '13px', color: '#475569', margin: '0 0 2px', fontWeight: '500' }}>{c.purpose || c.emergencyType}</p>
+                    )}
+                    <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0 }}>
                       {new Date(c.createdAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
                     </p>
                   </div>
                   {c.targetNumber && (
-                    <p className="text-xs font-mono text-slate-400">{c.targetNumber}</p>
+                    <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#94A3B8', background: '#F8FAFC', padding: '4px 8px', borderRadius: '8px' }}>
+                      {c.targetNumber}
+                    </span>
                   )}
                 </div>
+
                 {c.summary && (
-                  <p className="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100 line-clamp-2">
+                  <p style={{ fontSize: '12px', color: '#64748B', margin: '8px 0 0', lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {c.summary}
                   </p>
                 )}
@@ -227,6 +298,8 @@ export default function Admin() {
           })}
         </div>
       )}
+
+      <div style={{ height: '24px' }} />
     </div>
   );
 }
