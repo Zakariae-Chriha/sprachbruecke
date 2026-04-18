@@ -112,9 +112,9 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
   }
 });
 
-// POST /api/auth/init-admin
+// GET or POST /api/auth/init-admin
 // Creates or fixes the admin account using env vars — safe to call multiple times
-router.post('/init-admin', async (req, res) => {
+async function initAdmin(req, res) {
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
 
@@ -140,6 +140,9 @@ router.post('/init-admin', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Fehler', error: err.message });
   }
-});
+}
+
+router.get('/init-admin', initAdmin);
+router.post('/init-admin', initAdmin);
 
 module.exports = router;
