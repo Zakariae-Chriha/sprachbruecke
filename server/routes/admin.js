@@ -3,6 +3,7 @@ const router = express.Router();
 const requireAdmin = require('../middleware/requireAdmin');
 const User = require('../models/User');
 const CallLog = require('../models/CallLog');
+const { sendApprovalEmail } = require('../utils/mailer');
 
 // GET /api/admin/users — list all non-admin users
 router.get('/users', requireAdmin, async (req, res) => {
@@ -26,6 +27,9 @@ router.patch('/users/:id/approve', requireAdmin, async (req, res) => {
     ).select('-password -chatHistory -documents');
     if (!user) return res.status(404).json({ message: 'Benutzer nicht gefunden' });
     console.log(`✅ Benutzer genehmigt: ${user.email}`);
+    sendApprovalEmail(user.email, user.name, user.language).catch(err =>
+      console.error('Email-Fehler:', err.message)
+    );
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: 'Serverfehler', error: err.message });
