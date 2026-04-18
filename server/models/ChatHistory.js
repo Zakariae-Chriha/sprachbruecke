@@ -14,4 +14,7 @@ const chatHistorySchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+chatHistorySchema.index({ sessionId: 1 });
+chatHistorySchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('ChatHistory', chatHistorySchema);

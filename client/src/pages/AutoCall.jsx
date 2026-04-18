@@ -6,6 +6,9 @@ import {
   PhoneCall, PhoneOff, Loader2, CheckCircle,
   Copy, Mic, MicOff, Volume2, RefreshCw,
 } from 'lucide-react';
+import AuthWall from '../components/AuthWall';
+import UpgradeModal from '../components/UpgradeModal';
+import { useCallLimit } from '../hooks/useCallLimit';
 
 const LANGUAGE_NAMES = {
   ar: 'Arabic', de: 'German', en: 'English', tr: 'Turkish',
@@ -66,6 +69,7 @@ export default function AutoCall() {
   const { i18n } = useTranslation();
   const lang = i18n.language;
   const speechLang = SPEECH_LANG[lang] || 'en-US';
+  const { status: callStatus_, showUpgrade, setShowUpgrade, handleLimitReached } = useCallLimit();
 
   const [phoneNumber, setPhoneNumber]   = useState('');
   const [userName,    setUserName]      = useState('');
@@ -233,7 +237,11 @@ export default function AutoCall() {
       toast.success('📞 Anruf wird gestartet!');
       startPolling(res.data.callSid);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Fehler beim Starten');
+      if (err.response?.status === 402) {
+        handleLimitReached(err.response.data);
+      } else {
+        toast.error(err.response?.data?.message || 'Fehler beim Starten');
+      }
     } finally {
       setLoading(false);
     }
@@ -291,6 +299,15 @@ export default function AutoCall() {
   };
 
   return (
+    <AuthWall>
+    {showUpgrade && (
+      <UpgradeModal
+        onClose={() => setShowUpgrade(false)}
+        used={callStatus_?.callsThisMonth ?? 3}
+        limit={callStatus_?.freeCallsLimit ?? 3}
+        resetDate={callStatus_?.callsResetDate}
+      />
+    )}
     <div className="fade-in">
 
       {/* Header */}
@@ -301,6 +318,18 @@ export default function AutoCall() {
         </div>
         <h1 className="text-xl font-bold text-slate-800 mb-1">{t('title')}</h1>
         <p className="text-sm text-slate-500">{t('subtitle')}</p>
+        {callStatus_ && !callStatus_.isPremium && (
+          <p className="text-xs text-slate-400 mt-1">
+            {callStatus_.callsRemaining} von {callStatus_.freeCallsLimit} Anrufen übrig
+            {' · '}
+            <button onClick={() => setShowUpgrade(true)} className="text-blue-500 hover:underline">
+              Upgrade
+            </button>
+          </p>
+        )}
+        {callStatus_?.isPremium && (
+          <p className="text-xs text-green-600 mt-1">⭐ Premium — Unbegrenzte Anrufe</p>
+        )}
       </div>
 
       {/* Call status badge */}
@@ -504,5 +533,6 @@ export default function AutoCall() {
         </div>
       )}
     </div>
+    </AuthWall>
   );
 }

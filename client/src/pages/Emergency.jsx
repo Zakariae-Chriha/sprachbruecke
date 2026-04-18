@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Mic, MicOff, Volume2, PhoneCall, MapPin, Loader2, RefreshCw, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../api';
+import AuthWall from '../components/AuthWall';
+import UpgradeModal from '../components/UpgradeModal';
+import { useCallLimit } from '../hooks/useCallLimit';
 
 const SPEECH_LANG = {
   ar: 'ar-SA', de: 'de-DE', en: 'en-US', tr: 'tr-TR',
@@ -201,6 +204,7 @@ export default function Emergency() {
   const lang = T[i18n.language] ? i18n.language : 'en';
   const txt = T[lang];
   const speechLang = SPEECH_LANG[lang] || 'en-US';
+  const { status: callLimitStatus, showUpgrade, setShowUpgrade, handleLimitReached } = useCallLimit();
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -281,8 +285,12 @@ export default function Emergency() {
         coords: coords ? { lat: coords.lat, lon: coords.lon } : null,
       });
       toast.success(txt.called);
-    } catch {
-      toast.error('Verbindungsfehler');
+    } catch (err) {
+      if (err.response?.status === 402) {
+        handleLimitReached(err.response.data);
+      } else {
+        toast.error('Verbindungsfehler');
+      }
     } finally {
       setCalling(null);
     }
@@ -306,6 +314,15 @@ export default function Emergency() {
   );
 
   return (
+    <>
+    {showUpgrade && (
+      <UpgradeModal
+        onClose={() => setShowUpgrade(false)}
+        used={callLimitStatus?.callsThisMonth ?? 3}
+        limit={callLimitStatus?.freeCallsLimit ?? 3}
+        resetDate={callLimitStatus?.callsResetDate}
+      />
+    )}
     <div className="fade-in max-w-lg mx-auto">
       {/* Header */}
       <div className="text-center mb-5">
@@ -438,29 +455,32 @@ export default function Emergency() {
 
       {/* AI auto-call */}
       {name.trim() && address.trim() && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-red-100 fade-in">
-          <p className="text-sm font-semibold text-gray-700 mb-1 text-center">{txt.aiCallLabel}</p>
-          <p className="text-xs text-gray-400 text-center mb-4">{txt.aiCallNote}</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => callEmergency('police')}
-              disabled={!!calling}
-              className="flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold text-sm transition-all"
-            >
-              {calling === 'police' ? <Loader2 size={16} className="animate-spin" /> : <PhoneCall size={16} />}
-              {calling === 'police' ? txt.calling : '🚔 110'}
-            </button>
-            <button
-              onClick={() => callEmergency('fire')}
-              disabled={!!calling}
-              className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold text-sm transition-all"
-            >
-              {calling === 'fire' ? <Loader2 size={16} className="animate-spin" /> : <PhoneCall size={16} />}
-              {calling === 'fire' ? txt.calling : '🚒 112'}
-            </button>
+        <AuthWall>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-red-100 fade-in">
+            <p className="text-sm font-semibold text-gray-700 mb-1 text-center">{txt.aiCallLabel}</p>
+            <p className="text-xs text-gray-400 text-center mb-4">{txt.aiCallNote}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => callEmergency('police')}
+                disabled={!!calling}
+                className="flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold text-sm transition-all"
+              >
+                {calling === 'police' ? <Loader2 size={16} className="animate-spin" /> : <PhoneCall size={16} />}
+                {calling === 'police' ? txt.calling : '🚔 110'}
+              </button>
+              <button
+                onClick={() => callEmergency('fire')}
+                disabled={!!calling}
+                className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold text-sm transition-all"
+              >
+                {calling === 'fire' ? <Loader2 size={16} className="animate-spin" /> : <PhoneCall size={16} />}
+                {calling === 'fire' ? txt.calling : '🚒 112'}
+              </button>
+            </div>
           </div>
-        </div>
+        </AuthWall>
       )}
     </div>
+    </>
   );
 }

@@ -27,7 +27,17 @@ router.post(
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      user = new User({ name, email, password: hashedPassword, language });
+      const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase();
+      const isAdmin = adminEmail && email.toLowerCase() === adminEmail;
+
+      user = new User({
+        name,
+        email,
+        password: hashedPassword,
+        language,
+        role: isAdmin ? 'admin' : 'user',
+        isApproved: isAdmin ? true : false,
+      });
       await user.save();
 
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'fallback_secret', {
@@ -36,7 +46,14 @@ router.post(
 
       res.status(201).json({
         token,
-        user: { id: user._id, name: user.name, email: user.email, language: user.language },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          language: user.language,
+          role: user.role,
+          isApproved: user.isApproved,
+        },
       });
     } catch (err) {
       res.status(500).json({ message: 'Serverfehler', error: err.message });
@@ -70,7 +87,14 @@ router.post(
 
       res.json({
         token,
-        user: { id: user._id, name: user.name, email: user.email, language: user.language },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          language: user.language,
+          role: user.role,
+          isApproved: user.isApproved,
+        },
       });
     } catch (err) {
       res.status(500).json({ message: 'Serverfehler', error: err.message });
@@ -81,7 +105,7 @@ router.post(
 // GET /api/auth/me
 router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
+    const user = await User.findById(req.userId).select('-password -chatHistory -documents');
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: 'Serverfehler' });

@@ -1,0 +1,40 @@
+{
+  "name": "SprachBrücke",
+  "short_name": "SprachBrücke",
+  "description": "Mehrsprachige Assistenz für Behördengänge",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F0F4FA",
+  "theme_color": "#2563EB",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "lang": "de",
+  "shortcuts": [
+    {
+      "name": "Notruf",
+      "short_name": "SOS",
+      "url": "/emergency",
+      "description": "Notfallhilfe"
+    },
+    {
+      "name": "KI-Anruf",
+      "short_name": "Anruf",
+      "url": "/autocall",
+      "description": "Automatischer KI-Anruf"
+    }
+  ]
+}

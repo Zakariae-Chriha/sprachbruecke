@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const OpenAI = require('openai');
+const requireAuth = require('../middleware/auth');
+const CallLog = require('../models/CallLog');
 
 const openai = new OpenAI({
   apiKey: process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY,
@@ -101,6 +103,19 @@ router.post('/twilio-call', async (req, res) => {
     res.json({ success: true, callSid: call.sid });
   } catch (err) {
     res.status(500).json({ message: 'Anruffehler', error: err.message });
+  }
+});
+
+// GET /api/calls/history — current user's call history
+router.get('/history', requireAuth, async (req, res) => {
+  try {
+    const logs = await CallLog.find({ userId: req.userId })
+      .sort({ createdAt: -1 })
+      .limit(30)
+      .lean();
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ message: 'Serverfehler', error: err.message });
   }
 });
 

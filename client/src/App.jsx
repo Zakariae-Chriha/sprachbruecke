@@ -9,8 +9,14 @@ import CallHelper from './pages/CallHelper';
 import Letters from './pages/Letters';
 import AutoCall from './pages/AutoCall';
 import Emergency from './pages/Emergency';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Pending from './pages/Pending';
+import Admin from './pages/Admin';
+import UpgradeSuccess from './pages/UpgradeSuccess';
+import UpgradeCancel from './pages/UpgradeCancel';
+import History from './pages/History';
 
-// RTL-Sprachen
 const RTL_LANGUAGES = ['ar', 'fa', 'ku', 'he', 'ur'];
 
 export default function App() {
@@ -32,6 +38,13 @@ export default function App() {
         <Route path="/letters" element={<Letters />} />
         <Route path="/autocall" element={<AutoCall />} />
         <Route path="/emergency" element={<Emergency />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/pending" element={<Pending />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/upgrade/success" element={<UpgradeSuccess />} />
+        <Route path="/upgrade/cancel" element={<UpgradeCancel />} />
+        <Route path="/history" element={<History />} />
       </Routes>
     </Layout>
   );

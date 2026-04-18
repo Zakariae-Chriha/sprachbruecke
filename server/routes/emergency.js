@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const requireApproved = require('../middleware/requireApproved');
+const checkCallLimit = require('../middleware/checkCallLimit');
+const CallLog = require('../models/CallLog');
 
 // POST /api/emergency/call
-router.post('/call', async (req, res) => {
+router.post('/call', requireApproved, checkCallLimit, async (req, res) => {
   try {
     const { type, name, address, coords } = req.body;
 
@@ -11,8 +14,8 @@ router.post('/call', async (req, res) => {
       return res.status(503).json({ message: 'Twilio nicht konfiguriert.' });
     }
 
-    const ngrokUrl = process.env.NGROK_URL;
-    if (!ngrokUrl) return res.status(503).json({ message: 'NGROK_URL nicht konfiguriert.' });
+    const ngrokUrl = process.env.SERVER_URL || process.env.NGROK_URL;
+    if (!ngrokUrl) return res.status(503).json({ message: 'SERVER_URL nicht konfiguriert.' });
 
     const twilio = require('twilio');
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -33,6 +36,23 @@ router.post('/call', async (req, res) => {
     });
 
     console.log(`🆘 Notruf: ${call.sid} → ${emergencyNumber} | ${name} | ${address}`);
+
+    if (req.callUser && req.callUser.role !== 'admin') {
+      await req.callUser.updateOne({ $inc: { callsThisMonth: 1 } });
+    }
+
+    CallLog.create({
+      userId:        req.userId,
+      userName:      name || 'Unbekannt',
+      userEmail:     req.callUser?.email,
+      type:          'emergency',
+      emergencyType: type,
+      purpose:       type === 'police' ? 'Polizei 110' : 'Feuerwehr 112',
+      targetNumber:  emergencyNumber,
+      status:        'initiated',
+      callSid:       call.sid,
+    }).catch(() => {});
+
     res.json({ success: true, callSid: call.sid });
   } catch (err) {
     console.error('Notruf Fehler:', err.message);

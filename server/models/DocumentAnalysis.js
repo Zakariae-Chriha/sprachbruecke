@@ -7,4 +7,6 @@ const documentAnalysisSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+documentAnalysisSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('DocumentAnalysis', documentAnalysisSchema);

@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const OpenAI = require('openai');
+const requireApproved = require('../middleware/requireApproved');
+const checkCallLimit = require('../middleware/checkCallLimit');
+const CallLog = require('../models/CallLog');
 
 const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY,
@@ -62,7 +65,7 @@ router.get('/test-twiml', (req, res) => {
 // ============================
 // POST /api/autocall/start
 // ============================
-router.post('/start', async (req, res) => {
+router.post('/start', requireApproved, checkCallLimit, async (req, res) => {
   try {
     const { phoneNumber, userName, caseNumber, purpose, userLanguage, organizationName } = req.body;
 
@@ -73,10 +76,10 @@ router.post('/start', async (req, res) => {
 
     const twilio = require('twilio');
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    const ngrokUrl = process.env.NGROK_URL;
+    const ngrokUrl = process.env.SERVER_URL || process.env.NGROK_URL;
 
     if (!ngrokUrl) {
-      return res.status(503).json({ message: 'NGROK_URL nicht konfiguriert.' });
+      return res.status(503).json({ message: 'SERVER_URL nicht konfiguriert.' });
     }
 
     // Generate a temporary ID before we have callSid
@@ -114,7 +117,32 @@ router.post('/start', async (req, res) => {
     console.log(`📞 Anruf gestartet: ${call.sid} → ${phoneNumber}`);
     console.log(`📋 Kontext: ${JSON.stringify({ userName: callContext.userName, purpose: callContext.purpose, organizationName: callContext.organizationName })}`);
 
-    res.json({ success: true, callSid: call.sid, status: 'calling' });
+    // Increment monthly call counter for non-admins
+    if (req.callUser && req.callUser.role !== 'admin') {
+      await req.callUser.updateOne({ $inc: { callsThisMonth: 1 } });
+    }
+
+    // Log call to database
+    CallLog.create({
+      userId:       req.userId,
+      userName:     callContext.userName,
+      userEmail:    req.callUser?.email,
+      type:         'autocall',
+      purpose:      callContext.purpose,
+      targetNumber: phoneNumber.replace(/\d(?=\d{4})/g, '*'), // mask number
+      status:       'initiated',
+      callSid:      call.sid,
+    }).catch(() => {});
+
+    const callUser = req.callUser;
+    res.json({
+      success: true,
+      callSid: call.sid,
+      status: 'calling',
+      callsUsed: (callUser?.callsThisMonth ?? 0) + 1,
+      callsLimit: callUser?.freeCallsLimit ?? 3,
+      isPremium: callUser?.subscriptionStatus === 'active',
+    });
   } catch (err) {
     console.error('AutoCall Fehler:', err.message);
     res.status(500).json({ message: 'Anruffehler', error: err.message });
@@ -164,7 +192,7 @@ router.post('/webhook/voice', async (req, res) => {
       callData.status = 'in-progress';
     }
 
-    const ngrokUrl = process.env.NGROK_URL;
+    const ngrokUrl = process.env.SERVER_URL || process.env.NGROK_URL;
 
     // Speak the greeting slowly
     twiml.say({ voice: 'Polly.Vicki', language: 'de-DE' }, toSSML(intro));
@@ -285,7 +313,7 @@ PFLICHTREGELN — halte dich IMMER daran:
       twiml.hangup();
       if (callData) setTimeout(() => generateSummary(callSid), 2000);
     } else {
-      const ngrokUrl = process.env.NGROK_URL;
+      const ngrokUrl = process.env.SERVER_URL || process.env.NGROK_URL;
       const gather = twiml.gather({
         input: 'speech',
         language: 'de-DE',
@@ -329,6 +357,11 @@ router.post('/webhook/status', async (req, res) => {
       if (!activeCalls[CallSid].summary) {
         await generateSummary(CallSid);
       }
+      // Update log status + summary
+      CallLog.findOneAndUpdate(
+        { callSid: CallSid },
+        { status: CallStatus, summary: activeCalls[CallSid]?.summary || '' },
+      ).catch(() => {});
     }
   }
   res.sendStatus(200);
